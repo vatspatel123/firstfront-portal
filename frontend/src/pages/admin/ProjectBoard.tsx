@@ -1,0 +1,190 @@
+import { useEffect, useState, useRef } from 'react'
+import { MoreVertical, Calendar, AlertCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useProjectStore } from '../../store/useApiStores'
+import { BOARD_COLUMNS } from '../../utils/extendedMockData'
+
+const priorityStyles: Record<string, string> = {
+  high: 'bg-error-bg text-error',
+  medium: 'bg-warning-bg text-warning',
+  low: 'bg-gray-100 text-gray-600',
+}
+
+// Map frontend column IDs to backend status values
+const COLUMN_TO_STATUS: Record<string, string> = {
+  new: 'new',
+  data_review: 'data_review',
+  in_design: 'design_in_progress',
+  qa_review: 'qa_review',
+  approved: 'approved',
+  delivered: 'delivered',
+}
+
+// Map backend status values to frontend column IDs
+const STATUS_TO_COLUMN: Record<string, string> = {
+  new: 'new',
+  data_review: 'data_review',
+  missing_data: 'data_review',
+  data_complete: 'data_review',
+  assigned: 'in_design',
+  design_in_progress: 'in_design',
+  qa_review: 'qa_review',
+  approved: 'approved',
+  delivered: 'delivered',
+}
+
+export default function ProjectBoard() {
+  const { projects, loading, fetchProjects, updateStatus } = useProjectStore()
+  const [draggedId, setDraggedId] = useState<string | null>(null)
+  const dragRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    fetchProjects()
+  }, [])
+
+  const moveProject = async (id: string, newColId: string) => {
+    const apiStatus = COLUMN_TO_STATUS[newColId]
+    const project = projects.find(p => p.id === id)
+    if (!project) return
+
+    try {
+      await updateStatus(id, apiStatus)
+      const col = BOARD_COLUMNS.find(c => c.id === newColId)
+      if (col) toast.success(`${project.name} → ${col.label}`)
+    } catch {
+      toast.error(`Failed to move ${project.name}`)
+    }
+  }
+
+  const onDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+  const onDrop = (e: React.DragEvent, status: string) => {
+    e.preventDefault()
+    if (draggedId) {
+      moveProject(draggedId, status)
+      setDraggedId(null)
+    }
+  }
+
+  const counts = BOARD_COLUMNS.reduce((acc, col) => {
+    acc[col.id] = projects.filter(p => STATUS_TO_COLUMN[p.status] === col.id).length
+    return acc
+  }, {} as Record<string, number>)
+
+  const getDeadline = (createdAtStr: string) => {
+    const d = new Date(createdAtStr)
+    d.setDate(d.getDate() + 7)
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-ink">Project Board</h1>
+          <p className="text-gray-500 mt-1">Loading projects...</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {BOARD_COLUMNS.map((col) => (
+            <div key={col.id} className="bg-white rounded-xl shadow-card h-96 animate-pulse p-4">
+              <div className="h-6 bg-gray-100 rounded w-2/3 mb-4" />
+              <div className="space-y-2">
+                <div className="h-20 bg-gray-50 rounded" />
+                <div className="h-20 bg-gray-50 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div>
+        <h1 className="font-display text-2xl font-semibold text-ink">Project Board</h1>
+        <p className="text-gray-500 mt-1">Drag projects between columns to update their status</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {BOARD_COLUMNS.map((col) => {
+          const colProjects = projects.filter(p => STATUS_TO_COLUMN[p.status] === col.id)
+          return (
+            <div
+              key={col.id}
+              onDragOver={onDragOver}
+              onDrop={(e) => onDrop(e, col.id)}
+              className={`bg-white rounded-xl border-t-4 ${col.color} shadow-card flex flex-col min-h-[500px]`}
+            >
+              <div className="px-3 py-3 border-b border-gray-50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+                  <h3 className="font-display font-medium text-sm text-ink">{col.label}</h3>
+                </div>
+                <span className="text-xs font-medium text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded-full">{counts[col.id]}</span>
+              </div>
+
+              <div className="flex-1 p-2 space-y-2 overflow-y-auto max-h-[600px]">
+                {colProjects.map((p) => {
+                  const hasDesigner = p.designer_name && p.designer_name !== 'Unassigned'
+                  const initials = hasDesigner
+                    ? p.designer_name!.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                    : ''
+                  const prioNum = parseInt(p.id.replace(/-/g, '').slice(0, 2), 16) % 3
+                  const priority = prioNum === 0 ? 'high' : prioNum === 1 ? 'medium' : 'low'
+
+                  return (
+                    <div
+                      key={p.id}
+                      ref={dragRef}
+                      draggable
+                      onDragStart={(e) => onDragStart(e, p.id)}
+                      onDragEnd={() => setDraggedId(null)}
+                      className={`bg-white border border-gray-100 rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all hover:shadow-card ${
+                        draggedId === p.id ? 'opacity-40' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <p className="font-medium text-sm text-ink leading-snug">{p.name}</p>
+                        <button className="p-0.5 text-gray-300 hover:text-gray-500 -mr-1 -mt-1">
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-2">{p.client_name || 'Client'}</p>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
+                        <Calendar className="h-3 w-3" />
+                        <span>Due {getDeadline(p.created_at)}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                        <div className="flex items-center gap-1.5">
+                          {hasDesigner ? (
+                            <>
+                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white text-[9px] font-bold flex items-center justify-center">{initials}</div>
+                              <span className="text-[11px] text-gray-500 truncate max-w-[80px]">{p.designer_name!.split(' ')[0]}</span>
+                            </>
+                          ) : (
+                            <span className="text-[11px] text-warning flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Unassigned</span>
+                          )}
+                        </div>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${priorityStyles[priority]}`}>{priority}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+                {colProjects.length === 0 && (
+                  <div className="text-center py-8 text-xs text-gray-300">Drop projects here</div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

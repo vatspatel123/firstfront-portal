@@ -1,0 +1,32 @@
+# System Files
+.DS_Store
+Thumbs.db
+*.log
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.opencode
+opencode.json
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/firstfront.db
+backend/uploads/
+backend/outputs/
+backend/.env
