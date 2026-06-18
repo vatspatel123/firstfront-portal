@@ -13,7 +13,7 @@ app = FastAPI(title="First Front Portal & CRM", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url],
+    allow_origins=[o.strip() for o in settings.frontend_url.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

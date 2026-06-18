@@ -33,8 +33,9 @@ class Settings(BaseSettings):
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     ai_model: str = "meta-llama/llama-3.1-8b-instruct:free"
 
-    # Frontend URL (CORS)
-    frontend_url: str = "http://localhost:5173"
+    # Frontend URL(s) for CORS — comma-separated to allow multiple origins
+    # e.g. "https://clever-dusk-256fb7.netlify.app,http://localhost:5173"
+    frontend_url: str = "https://clever-dusk-256fb7.netlify.app,http://localhost:5173,http://localhost:3000"
 
     class Config:
         env_file = ".env"
