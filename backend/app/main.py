@@ -85,7 +85,7 @@ async def seed_database(secret: str = ""):
         from app.models.project import Project, ProjectStatus, ProjectStatusLog
         from app.models.lead import Lead, LeadStatus
         from app.models.note import Notification
-        from app.models.employee import Employee, LeaveRequest, PerformanceReview
+        from app.models.employee import Employee, Department, EmployeeStatus
         from app.models.message import Message, Invoice
         from passlib.hash import bcrypt
 
@@ -105,6 +105,7 @@ async def seed_database(secret: str = ""):
                 is_verified=True, is_active=True
             )
             db.add(sales_user)
+            await db.flush()
 
             # Clients
             clients_data = [
@@ -113,17 +114,18 @@ async def seed_database(secret: str = ""):
                 ("sun@test.com", "8888888883", "SunPower Solutions", "Amit Patel", "Large scale ground mount"),
             ]
             clients = []
-            for email, phone, company, person, details in clients_data:
-                user = User(
-                    id=uuid.uuid4(), name=person, email=email, phone=phone,
+            for c_email, c_phone, company, person, details in clients_data:
+                c_user = User(
+                    id=uuid.uuid4(), name=person, email=c_email, phone=c_phone,
                     password_hash=bcrypt.hash("client123"), role=UserRole.CLIENT,
                     is_verified=True, is_active=True
                 )
-                db.add(user)
+                db.add(c_user)
                 await db.flush()
-                client = Client(user_id=user.id, company_name=company, contact_person=person, company_details=details)
+                client = Client(user_id=c_user.id, company_name=company, contact_person=person, company_details=details)
                 db.add(client)
-                clients.append((user, client))
+                await db.flush()
+                clients.append((c_user, client))
 
             # Projects
             projects_data = [
@@ -133,71 +135,91 @@ async def seed_database(secret: str = ""):
                 ("Lake View Villa", "Lonavala", "8", "residential", "Design only"),
                 ("Mall Roof Project", "Thane", "100", "commercial", "Design + Installation"),
             ]
-            statuses = list(ProjectStatus)
+            all_statuses = list(ProjectStatus)
             proj_ids = []
-            for i, (name, loc, cap, ptype, services) in enumerate(projects_data):
-                client_user, client = clients[i % len(clients)]
+            for i, (p_name, loc, cap, ptype, services) in enumerate(projects_data):
+                _, p_client = clients[i % len(clients)]
                 project = Project(
-                    client_id=client.id, name=name, location=loc,
+                    client_id=p_client.id, name=p_name, location=loc,
                     capacity=cap, project_type=ptype, services_required=services,
-                    status=statuses[i % len(statuses)]
+                    status=all_statuses[i % len(all_statuses)]
                 )
                 db.add(project)
                 await db.flush()
                 proj_ids.append(project.id)
-                db.add(ProjectStatusLog(project_id=project.id, to_status=project.status.value, changed_by=admin.id, note="Project created"))
+                db.add(ProjectStatusLog(
+                    project_id=project.id, to_status=project.status.value,
+                    changed_by=admin.id, note="Project created"
+                ))
 
             # Leads
-            for name, company, phone, email, req, status in [
+            for l_name, l_company, l_phone, l_email, req, l_status in [
                 ("Vikram Singh", "Bajaj Solar", "7777777771", "vikram@bajaj.com", "50kW rooftop", LeadStatus.NEW),
                 ("Neha Gupta", "Tata Power", "7777777772", "neha@tata.com", "300kW ground mount", LeadStatus.CONTACTED),
                 ("Rohan Desai", "L&T Energy", "7777777773", "rohan@lt.com", "1MW solar farm", LeadStatus.INTERESTED),
                 ("Anita Verma", "HDFC Bank", "7777777774", "anita@hdfc.com", "Solar loan inquiry", LeadStatus.FOLLOWUP),
             ]:
-                db.add(Lead(name=name, company=company, phone=phone, email=email, requirement=req, status=status, lead_score=50))
+                db.add(Lead(
+                    name=l_name, company=l_company, phone=l_phone,
+                    email=l_email, requirement=req, status=l_status, lead_score=50
+                ))
 
             # Notifications
-            for msg in ["New lead: Vikram Singh (Bajaj Solar)", "Project 'Shanti Niketan Roof' updated", "Follow-up: Contact Neha Gupta"]:
-                db.add(Notification(user_id=admin.id, type="info", message=msg, is_read=False))
+            for n_msg in [
+                "New lead: Vikram Singh (Bajaj Solar)",
+                "Project 'Shanti Niketan Roof' updated",
+                "Follow-up: Contact Neha Gupta"
+            ]:
+                db.add(Notification(user_id=admin.id, type="info", message=n_msg, is_read=False))
 
-            # Employees
-            for name, role, dept, email, phone, join, salary, avatar in [
+            # Employees — use correct Department enum values
+            dept_map = {
+                "design": Department.DESIGN,
+                "sales": Department.SALES,
+                "hr": Department.HR,
+            }
+            emp_data = [
                 ("Priya Sharma", "Senior Designer", "design", "priya@firstfront.in", "+919876511111", "2022-03-15", "1200000", "PS"),
                 ("Vikram Singh", "Designer", "design", "vikram.d@firstfront.in", "+919876522222", "2023-01-20", "850000", "VS"),
                 ("Sneha Reddy", "Senior Designer", "design", "sneha@firstfront.in", "+919876555555", "2021-11-05", "1350000", "SR"),
                 ("Neha Kapoor", "Sales Lead", "sales", "neha.k@firstfront.in", "+919876588888", "2023-04-12", "900000", "NK"),
                 ("Meera Saxena", "HR Manager", "hr", "meera@firstfront.in", "+919876530303", "2021-07-15", "1100000", "MS"),
-            ]:
+            ]
+            for e_name, e_role, e_dept, e_email, e_phone, e_join, e_salary, e_avatar in emp_data:
                 emp_user = User(
-                    id=uuid.uuid4(), name=name, email=email, phone=phone,
+                    id=uuid.uuid4(), name=e_name, email=e_email, phone=e_phone,
                     password_hash=bcrypt.hash("employee123"), role=UserRole.DESIGNER,
                     is_verified=True, is_active=True
                 )
                 db.add(emp_user)
                 await db.flush()
                 db.add(Employee(
-                    user_id=emp_user.id, name=name, role=role, department=dept,
-                    email=email, phone=phone, join_date=datetime.strptime(join, "%Y-%m-%d"),
-                    salary=salary, status="active", avatar=avatar
+                    user_id=emp_user.id, name=e_name, role=e_role,
+                    department=dept_map[e_dept], email=e_email, phone=e_phone,
+                    join_date=datetime.strptime(e_join, "%Y-%m-%d"),
+                    salary=e_salary, status=EmployeeStatus.ACTIVE, avatar=e_avatar
                 ))
 
             # Invoices
-            from app.models.client import Client as ClientModel
-            cli_result = await db.execute(select(ClientModel))
-            cli_ids = [c.id for c in cli_result.scalars().all()]
-            for (inv_no, amount, status, method), proj_id, cli_id in zip(
-                [("INV-001","25000","paid","UPI"),("INV-002","45000","pending",""),("INV-003","120000","paid","NEFT")],
-                proj_ids, cli_ids * 3
+            cli_ids = [c.id for _, c in clients]
+            for (inv_no, inv_amount, inv_status, inv_method), p_id, c_id in zip(
+                [("INV-001","25000","paid","UPI"), ("INV-002","45000","pending",""), ("INV-003","120000","paid","NEFT")],
+                proj_ids,
+                cli_ids * 3
             ):
-                db.add(Invoice(project_id=proj_id, client_id=cli_id, amount=amount, status=status, method=method))
+                db.add(Invoice(project_id=p_id, client_id=c_id, amount=inv_amount, status=inv_status, method=inv_method))
 
             # Messages
-            for i, text in enumerate([
-                "Hi! I've started reviewing the site photos. Is the roof tilt 18° correct?",
+            for i, m_text in enumerate([
+                "Hi! I've started reviewing the site photos. Is the roof tilt 18 degrees correct?",
                 "Yes, that's correct. The roof faces south-west.",
                 "Perfect. I'll have the shadow analysis ready by tomorrow.",
             ]):
-                db.add(Message(project_id=proj_ids[0], sender_id=admin.id if i % 2 == 0 else clients[0][0].id, text=text, read=True))
+                db.add(Message(
+                    project_id=proj_ids[0],
+                    sender_id=admin.id if i % 2 == 0 else clients[0][0].id,
+                    text=m_text, read=True
+                ))
 
             await db.commit()
 
@@ -212,7 +234,8 @@ async def seed_database(secret: str = ""):
             }
         }
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        import traceback
+        return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
