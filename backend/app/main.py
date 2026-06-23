@@ -19,14 +19,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    from sqlalchemy import text
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-        # Ensure 'name' column exists on users table (SQLite compat)
-        try:
-            await conn.execute(text("ALTER TABLE users ADD COLUMN name VARCHAR(255)"))
-        except Exception:
-            pass
 
     try:
         from sqlalchemy import select
