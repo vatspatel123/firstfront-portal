@@ -19,7 +19,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
+    # Drop and recreate all tables to ensure correct schema
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
     # Auto-seed if no users exist
