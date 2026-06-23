@@ -2,88 +2,66 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import API from '../utils/api'
 
-export type UserRole = 'client' | 'designer' | 'admin' | 'sales'
-
 interface User {
-  user_id: string
-  role: UserRole
-  name: string
-  email?: string
-  phone?: string
+  id: string
+  email: string
+  phone: string
+  role: string
   company_name?: string
+  name?: string
+  is_verified?: boolean
 }
 
 interface AuthState {
-  token: string | null
   user: User | null
-  isAuthenticated: boolean
+  token: string | null
+  isLoading: boolean
+  signup: (data: any) => Promise<any>
   login: (email: string, password: string) => Promise<void>
-  signup: (data: { name: string; company_name: string; contact_person: string; email: string; phone: string; password: string }) => Promise<{ email: string; phone: string }>
-  verifyOTP: (email: string | null, phone: string | null, code: string) => Promise<void>
-  resendOTP: (email: string | null, phone: string | null) => Promise<void>
-  fetchMe: () => Promise<void>
+  verifyOtp: (email: string, code: string) => Promise<void>
   logout: () => void
+  init: () => void
+  fetchMe: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
-      token: null,
+    (set, get) => ({
       user: null,
-      isAuthenticated: false,
+      token: null,
+      isLoading: false,
+
+      signup: async (data) => {
+        const res = await API.post('/api/auth/signup', data)
+        return res.data
+      },
 
       login: async (email, password) => {
-        const { data } = await API.post('/auth/login', { email, password })
-        localStorage.setItem('firstfront-token', data.access_token)
-        set({
-          token: data.access_token,
-          user: {
-            user_id: data.user_id,
-            role: data.role as UserRole,
-            name: data.name || '',
-            company_name: data.company_name,
-          },
-          isAuthenticated: true,
-        })
+        const res = await API.post('/api/auth/login', { email, password })
+        set({ token: res.data.access_token, user: res.data })
       },
 
-      signup: async (signupData) => {
-        const { data } = await API.post('/auth/signup', signupData)
-        return { email: data.email, phone: data.phone }
+      verifyOtp: async (email, code) => {
+        await API.post('/api/auth/verify-otp', { email, code })
       },
 
-      verifyOTP: async (email, phone, code) => {
-        await API.post('/auth/verify-otp', { email, phone, code, purpose: 'signup' })
+      logout: () => {
+        set({ user: null, token: null })
       },
 
-      resendOTP: async (email, phone) => {
-        await API.post('/auth/resend-otp', null, { params: { email, phone } })
+      init: () => {
+        set({ isLoading: false })
       },
 
       fetchMe: async () => {
         try {
-          const { data } = await API.get('/auth/me')
-          set({
-            user: {
-              user_id: data.user_id,
-              role: data.role as UserRole,
-              name: data.name || '',
-              company_name: data.company_name,
-            },
-          })
+          const res = await API.get('/api/auth/me')
+          set({ user: { ...get().user, ...res.data } })
         } catch {
-          // If /me fails, user may have been deleted or token invalid
+          // Token expired or invalid
         }
-      },
-
-      logout: () => {
-        localStorage.removeItem('firstfront-token')
-        set({ token: null, user: null, isAuthenticated: false })
-      },
+      }
     }),
-    {
-      name: 'firstfront-auth',
-      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
-    }
+    { name: 'auth-storage', partialize: (state) => ({ user: state.user, token: state.token }) }
   )
 )

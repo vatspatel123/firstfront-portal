@@ -215,9 +215,22 @@ async def seed():
             )
             db.add(msg)
 
+        # Designer login user
+        designer_user = User(
+            id=uuid.uuid4(), name="Priya Sharma", email="designer@firstfront.in", phone="9999999997",
+            password_hash=bcrypt.hash("designer123"), role=UserRole.DESIGNER,
+            is_verified=True, is_active=True
+        )
+        db.add(designer_user)
+
         await db.commit()
-        print("Seed complete! Login credentials:")
-        print("  Admin: admin@firstfront.in / admin123")
-        print("  Client: acme@test.com / client123")
+        print("\n=== SEED COMPLETE — LOGIN CREDENTIALS ===")
+        print("  Admin:     admin@firstfront.in     / admin123")
+        print("  Sales:     sales@firstfront.in     / sales123")
+        print("  Designer:  designer@firstfront.in  / designer123")
+        print("  Client:    acme@test.com           / client123")
+        print("  Client:    green@test.com          / client123")
+        print("  Client:    sun@test.com            / client123")
+        print("==========================================\n")
 
 asyncio.run(seed())

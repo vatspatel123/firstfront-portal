@@ -6,8 +6,15 @@ const API = axios.create({
 })
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('firstfront-token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  const stored = localStorage.getItem('auth-storage')
+  if (stored) {
+    try {
+      const { state } = JSON.parse(stored)
+      if (state?.token) {
+        config.headers.Authorization = `Bearer ${state.token}`
+      }
+    } catch {}
+  }
   return config
 })
 
@@ -15,7 +22,7 @@ API.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('firstfront-token')
+      localStorage.removeItem('auth-storage')
       window.location.href = '/login'
     }
     return Promise.reject(err)

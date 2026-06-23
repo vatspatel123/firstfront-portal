@@ -4,7 +4,6 @@ from uuid import UUID
 from datetime import datetime
 
 class SignupRequest(BaseModel):
-    name: str
     company_name: str
     contact_person: str
     email: str
@@ -33,7 +32,6 @@ class LoginResponse(BaseModel):
     token_type: str = "bearer"
     user_id: UUID
     role: str
-    name: Optional[str] = None
     company_name: Optional[str] = None
 
 class UserResponse(BaseModel):
@@ -46,10 +44,3 @@ class UserResponse(BaseModel):
 
 class UserInDB(UserResponse):
     password_hash: str
-
-class ProfileUpdateRequest(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    password: Optional[str] = None
-    company_name: Optional[str] = None

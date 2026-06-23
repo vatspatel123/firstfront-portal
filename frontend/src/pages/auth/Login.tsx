@@ -1,25 +1,23 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Sun, Mail, Lock, Eye, EyeOff } from 'lucide-react'
-import toast from 'react-hot-toast'
 import { useAuthStore } from '../../store/authStore'
+import { Sun, Mail, Lock } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function Login() {
-  const navigate = useNavigate()
-  const { login } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { login } = useAuthStore()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password) return toast.error('Please fill all fields')
     setLoading(true)
     try {
       await login(email, password)
       toast.success('Logged in successfully')
-      navigate('/')
+      navigate('/portal')
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Login failed')
     } finally {
@@ -28,50 +26,53 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-sun-400 flex items-center justify-center mx-auto mb-4">
-            <Sun className="h-6 w-6 text-white" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-800 to-primary-900 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+        <div className="flex items-center gap-3 mb-8">
+          <Sun className="h-10 w-10 text-solar-500" />
+          <div>
+            <h1 className="text-2xl font-bold text-primary-800">First Front</h1>
+            <p className="text-sm text-gray-500">Solar Design Portal</p>
           </div>
-          <h1 className="font-display text-2xl font-semibold text-ink">Welcome back</h1>
-          <p className="text-gray-500 mt-1">Sign in to your First Front account</p>
         </div>
-
-        <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-ink mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <input
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="you@company.com" className="input-field pl-10" autoComplete="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
               />
             </div>
           </div>
-
           <div>
-            <label className="block text-xs font-medium text-ink mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <input
-                type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••" className="input-field pl-10 pr-10" autoComplete="current-password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
               />
-              <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
             </div>
           </div>
-
-          <button type="submit" disabled={loading} className="btn-primary w-full !py-2.5 disabled:opacity-50">
-            {loading ? 'Signing in...' : 'Sign in'}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="mt-6 text-center text-sm text-gray-500">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-brand-500 hover:text-brand-600 font-medium">Create one</Link>
+          <Link to="/signup" className="text-primary-600 hover:underline">Sign up</Link>
         </p>
       </div>
     </div>

@@ -1,19 +1,18 @@
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import type { UserRole } from '../store/authStore'
 
 interface Props {
   children: React.ReactNode
-  allowedRoles?: UserRole[]
+  allowedRoles?: string[]
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
-  const { isAuthenticated, user } = useAuthStore()
+  const { user, token } = useAuthStore()
+  const isAuthenticated = !!token
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    // Redirect to the user's home page based on their role
     const homeMap: Record<string, string> = {
       client: '/',
       designer: '/designer/tasks',

@@ -22,9 +22,6 @@ class LeadResponse(BaseModel):
     lead_score: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class LeadStatusUpdate(BaseModel):
     status: str
     assigned_to: Optional[UUID] = None
@@ -44,9 +41,6 @@ class FollowUpResponse(BaseModel):
     status: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class SalesActivityCreate(BaseModel):
     lead_id: Optional[UUID] = None
     discussion_notes: str
@@ -59,6 +53,3 @@ class SalesActivityResponse(BaseModel):
     discussion_notes: str
     next_action: Optional[str]
     date: datetime
-
-    class Config:
-        from_attributes = True

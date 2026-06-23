@@ -22,21 +22,8 @@ class ProjectResponse(BaseModel):
     notes: Optional[str]
     status: str
     assigned_to: Optional[UUID]
-    client_name: Optional[str] = None
-    designer_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
-
-class ProjectUpdate(BaseModel):
-    name: Optional[str] = None
-    location: Optional[str] = None
-    capacity: Optional[str] = None
-    project_type: Optional[str] = None
-    services_required: Optional[str] = None
-    notes: Optional[str] = None
 
 class ProjectStatusUpdate(BaseModel):
     status: str
@@ -51,9 +38,6 @@ class ProjectFileResponse(BaseModel):
     original_name: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class ProjectOutputCreate(BaseModel):
     notes: Optional[str] = None
 
@@ -64,6 +48,3 @@ class ProjectOutputResponse(BaseModel):
     original_name: str
     notes: Optional[str]
     created_at: datetime
-
-    class Config:
-        from_attributes = True

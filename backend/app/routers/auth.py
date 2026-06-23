@@ -2,15 +2,27 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from passlib.hash import bcrypt
+from pydantic import BaseModel
+from typing import Optional
 from app.database import get_db
 from app.models.user import User, UserRole
 from app.models.client import Client
-from app.schemas.user import SignupRequest, LoginRequest, LoginResponse, VerifyOTPRequest, ProfileUpdateRequest
+from app.schemas.user import SignupRequest, LoginRequest, LoginResponse, VerifyOTPRequest
 from app.utils.jwt import create_access_token
 from app.utils.otp import create_and_send_otp, verify_otp
 from app.utils.auth import get_current_user
 
 router = APIRouter()
+
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    company_name: Optional[str] = None
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
 
 @router.post("/signup")
 async def signup(req: SignupRequest, db: AsyncSession = Depends(get_db)):
@@ -22,7 +34,6 @@ async def signup(req: SignupRequest, db: AsyncSession = Depends(get_db)):
 
     password_hash = bcrypt.hash(req.password)
     user = User(
-        name=req.name,
         email=req.email,
         phone=req.phone,
         password_hash=password_hash,
@@ -99,7 +110,6 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
         access_token=token,
         user_id=user.id,
         role=user.role.value,
-        name=user.name,
         company_name=company_name
     )
 
@@ -111,71 +121,63 @@ async def resend_otp(email: str = None, phone: str = None, db: AsyncSession = De
     return {"message": "OTP resent"}
 
 @router.get("/me")
-async def get_me(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
-    """Return the current user's profile."""
-    db_user = user # already a User model from Depends
-
+async def get_profile(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     company_name = None
-    if db_user.role == UserRole.CLIENT:
-        client_result = await db.execute(select(Client).where(Client.user_id == db_user.id))
+    if user.role == UserRole.CLIENT:
+        client_result = await db.execute(select(Client).where(Client.user_id == user.id))
         client = client_result.scalar_one_or_none()
         company_name = client.company_name if client else None
 
     return {
-        "user_id": str(db_user.id),
-        "name": db_user.name,
-        "email": db_user.email,
-        "phone": db_user.phone,
-        "role": db_user.role.value,
+        "id": str(user.id),
+        "email": user.email,
+        "phone": user.phone,
+        "role": user.role.value,
+        "is_verified": user.is_verified,
         "company_name": company_name,
-        "is_verified": db_user.is_verified,
+        "created_at": user.created_at.isoformat()
     }
 
 @router.put("/me")
-async def update_me(
-    req: ProfileUpdateRequest,
-    db: AsyncSession = Depends(get_db),
-    user=Depends(get_current_user)
+async def update_profile(
+    req: ProfileUpdate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
-    """Update current user's profile."""
-    db_user = user
-
-    if req.email and req.email != db_user.email:
-        existing = await db.execute(select(User).where(User.email == req.email))
+    if req.email:
+        existing = await db.execute(
+            select(User).where(User.email == req.email, User.id != user.id)
+        )
         if existing.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="Email already registered")
-        db_user.email = req.email
+            raise HTTPException(status_code=400, detail="Email already in use")
+        user.email = req.email
 
-    if req.phone and req.phone != db_user.phone:
-        existing = await db.execute(select(User).where(User.phone == req.phone))
+    if req.phone:
+        existing = await db.execute(
+            select(User).where(User.phone == req.phone, User.id != user.id)
+        )
         if existing.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="Phone number already registered")
-        db_user.phone = req.phone
+            raise HTTPException(status_code=400, detail="Phone already in use")
+        user.phone = req.phone
 
-    if req.name:
-        db_user.name = req.name
-
-    if req.password:
-        db_user.password_hash = bcrypt.hash(req.password)
-
-    company_name = None
-    if db_user.role == UserRole.CLIENT:
-        client_result = await db.execute(select(Client).where(Client.user_id == db_user.id))
+    if user.role == UserRole.CLIENT and req.company_name:
+        client_result = await db.execute(select(Client).where(Client.user_id == user.id))
         client = client_result.scalar_one_or_none()
         if client:
-            if req.company_name:
-                client.company_name = req.company_name
-            company_name = client.company_name
+            client.company_name = req.company_name
 
     await db.commit()
+    return {"message": "Profile updated"}
 
-    return {
-        "user_id": str(db_user.id),
-        "name": db_user.name,
-        "email": db_user.email,
-        "phone": db_user.phone,
-        "role": db_user.role.value,
-        "company_name": company_name,
-        "is_verified": db_user.is_verified,
-    }
+@router.put("/me/password")
+async def update_password(
+    req: PasswordUpdate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not bcrypt.verify(req.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
 
+    user.password_hash = bcrypt.hash(req.new_password)
+    await db.commit()
+    return {"message": "Password updated"}

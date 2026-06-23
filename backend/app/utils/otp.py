@@ -11,33 +11,25 @@ def generate_otp() -> str:
     return str(random.randint(100000, 999999))
 
 async def send_otp_email(email: str, code: str):
-    resend_key = getattr(settings, 'resend_api_key', None)
-    if resend_key:
+    if settings.resend_api_key:
         import resend
-        resend.api_key = resend_key
+        resend.api_key = settings.resend_api_key
         resend.Emails.send({
-            "from": getattr(settings, 'from_email', 'support@firstfront.in'),
+            "from": settings.from_email,
             "to": email,
             "subject": "Your OTP for First Front Portal",
             "html": f"<p>Your OTP is: <strong>{code}</strong></p><p>Valid for {settings.otp_expire_minutes} minutes.</p>"
         })
-    else:
-        # For local dev without API key, just print the OTP
-        print(f"--- MOCK EMAIL OTP to {email}: {code} ---")
 
 async def send_otp_sms(phone: str, code: str):
-    twilio_sid = getattr(settings, 'twilio_account_sid', None)
-    if twilio_sid:
+    if settings.twilio_account_sid:
         from twilio.rest import Client
-        client = Client(twilio_sid, getattr(settings, 'twilio_auth_token', None))
+        client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
         client.messages.create(
             body=f"Your OTP for First Front Portal: {code}",
-            from_=getattr(settings, 'twilio_phone_number', None),
+            from_=settings.twilio_phone_number,
             to=phone
         )
-    else:
-        # For local dev without API key, just print the OTP
-        print(f"--- MOCK SMS OTP to {phone}: {code} ---")
 
 async def create_and_send_otp(db: AsyncSession, email: str = None, phone: str = None, purpose: str = "signup"):
     code = generate_otp()

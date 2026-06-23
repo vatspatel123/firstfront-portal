@@ -2,7 +2,14 @@ import { useEffect, useState, useRef } from 'react'
 import { MoreVertical, Calendar, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useProjectStore } from '../../store/useApiStores'
-import { BOARD_COLUMNS } from '../../utils/extendedMockData'
+const BOARD_COLUMNS = [
+  { id: 'new', label: 'New', color: 'border-gray-300', dot: 'bg-gray-400' },
+  { id: 'data_review', label: 'Data Review', color: 'border-primary-300', dot: 'bg-primary-500' },
+  { id: 'in_design', label: 'In Design', color: 'border-amber-400', dot: 'bg-amber-500' },
+  { id: 'qa_review', label: 'QA Review', color: 'border-purple-300', dot: 'bg-purple-500' },
+  { id: 'approved', label: 'Approved', color: 'border-green-300', dot: 'bg-green-500' },
+  { id: 'delivered', label: 'Delivered', color: 'border-green-500', dot: 'bg-green-700' },
+]
 
 const priorityStyles: Record<string, string> = {
   high: 'bg-error-bg text-error',
