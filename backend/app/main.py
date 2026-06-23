@@ -11,7 +11,7 @@ app = FastAPI(title="First Front Portal & CRM", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url, "https://clever-dusk-256fb7.netlify.app", "http://localhost:5173"],
+    allow_origins=[settings.frontend_url, "https://clever-dusk-256fb7.netlify.app", "https://boisterous-cat-f080ea.netlify.app", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,21 +19,23 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    # Drop and recreate all tables to ensure correct schema
+    from sqlalchemy import text
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+        # Ensure 'name' column exists on users table (SQLite compat)
+        try:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN name VARCHAR(255)"))
+        except Exception:
+            pass
 
-    # Auto-seed if no users exist
     try:
-        from sqlalchemy import select, text
+        from sqlalchemy import select
         from app.models.user import User
         from app.database import async_session
         async with async_session() as db:
             existing = await db.execute(select(User).limit(1))
             if not existing.scalar_one_or_none():
                 import uuid
-                from datetime import datetime
                 from app.models.user import UserRole
                 from app.models.client import Client
                 from app.models.project import Project, ProjectStatus, ProjectStatusLog
