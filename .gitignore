@@ -30,3 +30,6 @@ backend/firstfront.db
 backend/uploads/
 backend/outputs/
 backend/.env
+
+# Local Netlify folder
+.netlify
