@@ -1,0 +1,55 @@
+- generic [ref=e2]:
+  - status [ref=e38]: Logged in successfully
+  - generic [ref=e39]:
+    - complementary [ref=e40]:
+      - generic [ref=e41]:
+        - img [ref=e42]
+        - generic [ref=e48]:
+          - heading "First Front" [level=1] [ref=e49]
+          - paragraph [ref=e50]: CRM System
+      - navigation [ref=e51]:
+        - link "Dashboard" [ref=e52] [cursor=pointer]:
+          - /url: /crm
+          - img [ref=e53]
+          - text: Dashboard
+        - link "Leads" [ref=e58] [cursor=pointer]:
+          - /url: /crm/leads
+          - img [ref=e59]
+          - text: Leads
+        - link "Projects" [ref=e64] [cursor=pointer]:
+          - /url: /crm/projects
+          - img [ref=e65]
+          - text: Projects
+        - link "Follow-ups" [ref=e68] [cursor=pointer]:
+          - /url: /crm/followups
+          - img [ref=e69]
+          - text: Follow-ups
+      - generic [ref=e72]:
+        - generic [ref=e73]: designer
+        - button "Logout" [ref=e74] [cursor=pointer]:
+          - img [ref=e75]
+          - text: Logout
+    - main [ref=e78]:
+      - generic [ref=e79]:
+        - heading "CRM Dashboard" [level=1] [ref=e80]
+        - generic [ref=e81]:
+          - generic [ref=e83]:
+            - img [ref=e85]
+            - generic [ref=e90]:
+              - paragraph [ref=e91]: Total Leads
+              - paragraph [ref=e92]: "3"
+          - generic [ref=e94]:
+            - img [ref=e96]
+            - generic [ref=e99]:
+              - paragraph [ref=e100]: Total Projects
+              - paragraph [ref=e101]: "3"
+          - generic [ref=e103]:
+            - img [ref=e105]
+            - generic [ref=e108]:
+              - paragraph [ref=e109]: Active Projects
+              - paragraph [ref=e110]: "2"
+          - generic [ref=e112]:
+            - img [ref=e114]
+            - generic [ref=e117]:
+              - paragraph [ref=e118]: Pending Follow-ups
+              - paragraph [ref=e119]: "0"

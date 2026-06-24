@@ -25,6 +25,13 @@ function ProtectedRoute({ children, role }: { children: React.ReactNode; role?: 
   return <>{children}</>
 }
 
+function RoleRedirect() {
+  const { user } = useAuthStore()
+  if (!user) return <Navigate to="/login" />
+  const roleMap: Record<string, string> = { client: '/portal', designer: '/crm', admin: '/crm', sales: '/crm' }
+  return <Navigate to={roleMap[user.role] || '/crm'} />
+}
+
 export default function App() {
   const { init } = useAuthStore()
   useEffect(() => { init() }, [])
@@ -49,7 +56,7 @@ export default function App() {
           <Route path="projects" element={<CrmProjects />} />
           <Route path="followups" element={<Followups />} />
         </Route>
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<RoleRedirect />} />
       </Routes>
     </BrowserRouter>
   )
