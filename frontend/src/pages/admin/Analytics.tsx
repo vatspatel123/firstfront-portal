@@ -15,8 +15,8 @@ export default function Analytics() {
     const fetchData = async () => {
       try {
         const [projectsRes, leadsRes] = await Promise.all([
-          api.get('/projects/'),
-          api.get('/leads/')
+          api.get('/api/projects/'),
+          api.get('/api/leads/')
         ])
         const projects = projectsRes.data
         setStats({

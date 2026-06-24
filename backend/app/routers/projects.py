@@ -10,6 +10,9 @@ from app.models.user import User
 from app.schemas.project import (ProjectCreate, ProjectResponse, ProjectStatusUpdate,
                                  ProjectFileResponse, ProjectOutputResponse)
 from app.utils.auth import get_current_user, get_current_client
+from app.services.file_storage import save_upload, get_file_path
+from app.models.note import Notification
+from fastapi.responses import FileResponse
 
 router = APIRouter()
 
@@ -17,12 +20,24 @@ router = APIRouter()
 async def create_project(
     req: ProjectCreate,
     db: AsyncSession = Depends(get_db),
-    user=Depends(get_current_client)
+    user=Depends(get_current_user)
 ):
+    # Find or create client profile for this user
     client = await db.execute(select(Client).where(Client.user_id == user.id))
     client = client.scalar_one_or_none()
     if not client:
-        raise HTTPException(status_code=404, detail="Client profile not found")
+        # Auto-create client profile for non-client users (admin/sales creating on behalf)
+        from app.models.user import UserRole
+        if user.role in [UserRole.ADMIN, UserRole.SALES, UserRole.DESIGNER]:
+            client = Client(
+                user_id=user.id,
+                company_name=user.name or user.email,
+                contact_person=user.name or user.email,
+            )
+            db.add(client)
+            await db.flush()
+        else:
+            raise HTTPException(status_code=404, detail="Client profile not found")
 
     project = Project(
         client_id=client.id,
@@ -155,6 +170,25 @@ async def update_project_status(
         note=req.note
     )
     db.add(log)
+
+    # Create notification for the assigned designer or client
+    status_label = req.status.replace('_', ' ').title()
+    notif_user_id = req.assigned_to if req.assigned_to else project.client_id
+    # For clients, we need the user_id from client profile
+    if not req.assigned_to:
+        client_result = await db.execute(select(Client).where(Client.id == project.client_id))
+        client = client_result.scalar_one_or_none()
+        if client:
+            notif_user_id = client.user_id
+    if notif_user_id and str(notif_user_id) != str(user.id):
+        notification = Notification(
+            user_id=notif_user_id,
+            type="status_change",
+            message=f"Project '{project.name}' status updated to {status_label}" + (f" — {req.note}" if req.note else ""),
+            related_id=project.id
+        )
+        db.add(notification)
+
     await db.commit()
 
     return {"message": "Status updated"}
@@ -167,14 +201,11 @@ async def upload_file(
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    contents = await file.read()
-    file_type = file.content_type or "application/octet-stream"
-    file_url = f"uploads/{project_id}/{file.filename}"
-
+    file_url = await save_upload(str(project_id), file)
     project_file = ProjectFile(
         project_id=project_id,
         uploaded_by=user.id,
-        file_type=file_type,
+        file_type=file.content_type or "application/octet-stream",
         file_url=file_url,
         original_name=file.filename
     )
@@ -182,3 +213,51 @@ async def upload_file(
     await db.commit()
     await db.refresh(project_file)
     return project_file
+
+
+@router.get("/{project_id}/files", response_model=List[ProjectFileResponse])
+async def list_project_files(
+    project_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    result = await db.execute(
+        select(ProjectFile).where(ProjectFile.project_id == project_id).order_by(ProjectFile.created_at.desc())
+    )
+    return result.scalars().all()
+
+
+@router.get("/{project_id}/outputs", response_model=List[ProjectOutputResponse])
+async def list_project_outputs(
+    project_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    result = await db.execute(
+        select(ProjectOutput).where(ProjectOutput.project_id == project_id).order_by(ProjectOutput.created_at.desc())
+    )
+    return result.scalars().all()
+
+
+@router.get("/download/{file_id}")
+async def download_file(file_id: UUID, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    result = await db.execute(select(ProjectFile).where(ProjectFile.id == file_id))
+    project_file = result.scalar_one_or_none()
+    if not project_file:
+        raise HTTPException(status_code=404, detail="File not found")
+    file_path = get_file_path(project_file.file_url)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    return FileResponse(path=str(file_path), filename=project_file.original_name, media_type=project_file.file_type)
+
+
+@router.get("/download-output/{output_id}")
+async def download_output(output_id: UUID, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    result = await db.execute(select(ProjectOutput).where(ProjectOutput.id == output_id))
+    output = result.scalar_one_or_none()
+    if not output:
+        raise HTTPException(status_code=404, detail="Output not found")
+    file_path = get_file_path(output.file_url)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    return FileResponse(path=str(file_path), filename=output.original_name, media_type="application/octet-stream")

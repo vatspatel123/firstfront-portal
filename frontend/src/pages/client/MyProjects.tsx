@@ -78,7 +78,7 @@ export default function MyProjects() {
                 {grouped.active.map((p) => {
                   const status = STATUS_FLOW[p.status] || { label: p.status, color: 'bg-gray-100 text-gray-600' }
                   return (
-                    <Link key={p.id} to={`/projects/${p.id}`} className="card-hover p-5 block">
+                    <Link key={p.id} to={`/portal/projects/${p.id}`} className="card-hover p-5 block">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <p className="font-display font-medium text-ink">{p.name}</p>

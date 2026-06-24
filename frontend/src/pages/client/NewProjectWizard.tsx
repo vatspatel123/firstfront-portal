@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ArrowLeft, ArrowRight, Check, Sun, FileSearch, Building2, FileText, Search, Upload, MapPin, Home, Monitor, Factory } from 'lucide-react'
+import { useState, useRef, useCallback } from 'react'
+import { ArrowLeft, ArrowRight, Check, Sun, FileSearch, Building2, FileText, Search, Upload, MapPin, Home, Monitor, Factory, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import API from '../../utils/api'
 import { SERVICE_TYPES } from '../../utils/constants'
@@ -34,6 +34,8 @@ export default function NewProjectWizard() {
   const [files, setFiles] = useState<File[]>([])
   const [showSuccess, setShowSuccess] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [dragging, setDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = async () => {
     setSubmitting(true)
@@ -53,7 +55,7 @@ export default function NewProjectWizard() {
         for (const file of files) {
           const formData = new FormData()
           formData.append('file', file)
-          await API.post(`/files/upload/${projectId}`, formData, {
+          await API.post(`/api/files/upload/${projectId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           })
         }
@@ -61,8 +63,9 @@ export default function NewProjectWizard() {
 
       setShowSuccess(true)
       toast.success('Project submitted successfully!')
-    } catch {
-      toast.error('Failed to submit project. Please try again.')
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || 'Failed to submit project. Please try again.'
+      toast.error(msg)
     } finally {
       setSubmitting(false)
     }
@@ -91,10 +94,40 @@ export default function NewProjectWizard() {
     return true
   }
 
+  const addFiles = (newFiles: FileList | File[]) => {
+    const arr = Array.from(newFiles)
+    setFiles(prev => [...prev, ...arr])
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(prev => [...prev, ...Array.from(e.target.files!)])
+      addFiles(e.target.files)
     }
+  }
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragging(false)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragging(false)
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFiles(e.dataTransfer.files)
+    }
+  }, [])
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   return (
@@ -193,19 +226,53 @@ export default function NewProjectWizard() {
         {step === 3 && (
           <div className="space-y-6">
             <h2 className="font-display text-lg font-semibold text-ink">Upload Site Files</h2>
-            <label className="block border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-brand-500/50 transition-colors cursor-pointer">
-              <Upload className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-              <p className="font-medium text-ink">Drop files here or click to browse</p>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleFileChange}
+            />
+
+            {/* Drop zone */}
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`block border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                dragging
+                  ? 'border-brand-500 bg-brand-50/50 scale-[1.02]'
+                  : 'border-gray-200 hover:border-brand-500/50 hover:bg-gray-50'
+              }`}
+            >
+              <Upload className={`h-10 w-10 mx-auto mb-3 transition-colors ${dragging ? 'text-brand-500' : 'text-gray-300'}`} />
+              <p className="font-medium text-ink">
+                {dragging ? 'Drop files here!' : 'Drop files here or click to browse'}
+              </p>
               <p className="text-sm text-gray-500 mt-1">Site photos, KML files, site plans (max 25 MB each)</p>
-              <input type="file" multiple className="hidden" onChange={handleFileChange} />
-            </label>
+            </div>
+
             {files.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm font-medium text-ink">{files.length} file(s) selected</p>
                 {files.map((f, i) => (
                   <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2.5">
-                    <span className="text-sm text-ink">{f.name}</span>
-                    <span className="text-xs text-gray-400">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="h-4 w-4 text-gray-400 shrink-0" />
+                      <span className="text-sm text-ink truncate">{f.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-gray-400">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeFile(i) }}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -247,7 +314,7 @@ export default function NewProjectWizard() {
             else handleSubmit()
           }} disabled={!canNext() || submitting}
             className="btn-primary flex items-center gap-2">
-            {submitting ? 'Submitting...' : step === 4 ? 'Submit Project' : 'Continue'} 
+            {submitting ? 'Submitting...' : step === 4 ? 'Submit Project' : 'Continue'}
             {!submitting && <ArrowRight className="h-4 w-4" />}
           </button>
         </div>

@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Search, ChevronDown, Calendar, UserCheck } from 'lucide-react'
+import { Search, ChevronDown, Calendar, UserCheck, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useProjectStore, useEmployeeStore } from '../../store/useApiStores'
+import API from '../../utils/api'
 
 export default function ProjectAssignment() {
-  const { projects, loading: projectsLoading, fetchProjects, assignDesigner } = useProjectStore()
+  const { projects, loading: projectsLoading, fetchProjects } = useProjectStore()
   const { employees, loading: employeesLoading, fetchEmployees } = useEmployeeStore()
   const [search, setSearch] = useState('')
+  const [scopeNotes, setScopeNotes] = useState<Record<string, string>>({})
+  const [deadlines, setDeadlines] = useState<Record<string, string>>({})
+  const [assigning, setAssigning] = useState<string | null>(null)
 
   useEffect(() => {
     fetchProjects()
@@ -22,26 +26,45 @@ export default function ProjectAssignment() {
   const unassigned = filtered.filter(p => !p.assigned_to)
 
   const handleAssignDesigner = async (projectId: string, designerUserId: string) => {
-    try {
-      if (!designerUserId) {
-        // If unassigned selected, update status to data_complete / unassigned
-        await assignDesigner(projectId, '')
+    if (!designerUserId) {
+      try {
+        await API.patch(`/api/projects/${projectId}/status`, { status: 'new', assigned_to: null })
         toast.success('Project unassigned')
-      } else {
-        const designer = employees.find(e => e.user_id === designerUserId)
-        await assignDesigner(projectId, designerUserId)
-        toast.success(designer ? `Project assigned to ${designer.name}` : 'Project assigned')
+        fetchProjects()
+      } catch {
+        toast.error('Failed to unassign')
       }
-      fetchProjects() // Refresh details to show names correctly
+      return
+    }
+
+    setAssigning(projectId)
+    try {
+      const deadline = deadlines[projectId] ? new Date(deadlines[projectId]).toISOString() : undefined
+      const scope = scopeNotes[projectId] || ''
+
+      await API.patch(`/api/projects/${projectId}/status`, {
+        status: 'assigned',
+        assigned_to: designerUserId,
+        deadline,
+        note: scope || undefined
+      })
+
+      const designer = employees.find(e => e.user_id === designerUserId)
+      toast.success(designer ? `Assigned to ${designer.name}` : 'Project assigned')
+      fetchProjects()
+      setScopeNotes(prev => { const n = { ...prev }; delete n[projectId]; return n })
+      setDeadlines(prev => { const n = { ...prev }; delete n[projectId]; return n })
     } catch {
       toast.error('Failed to assign designer')
+    } finally {
+      setAssigning(null)
     }
   }
 
   const getDeadline = (createdAtStr: string) => {
     const d = new Date(createdAtStr)
     d.setDate(d.getDate() + 7)
-    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+    return d.toISOString().split('T')[0]
   }
 
   const Select = ({ projectId, current }: { projectId: string; current: string | null }) => (
@@ -49,7 +72,8 @@ export default function ProjectAssignment() {
       <select
         value={current || ''}
         onChange={e => handleAssignDesigner(projectId, e.target.value)}
-        className="appearance-none input-field !py-2 !text-sm pr-8 cursor-pointer"
+        disabled={assigning === projectId}
+        className="appearance-none input-field !py-2 !text-sm pr-8 cursor-pointer disabled:opacity-50"
       >
         <option value="">— Unassigned —</option>
         {employees.filter(e => e.department.toLowerCase() === 'design').map(e => (
@@ -76,7 +100,7 @@ export default function ProjectAssignment() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="font-display text-2xl font-semibold text-ink">Project Assignment</h1>
-        <p className="text-gray-500 mt-1">Assign or reassign designers to active projects</p>
+        <p className="text-gray-500 mt-1">Assign designers to projects, set deadlines and scope</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -102,13 +126,44 @@ export default function ProjectAssignment() {
           </div>
           <div className="divide-y divide-gray-50">
             {unassigned.map(p => (
-              <div key={p.id} className="px-5 py-4 flex items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-ink text-sm">{p.name}</p>
-                  <p className="text-xs text-gray-400">{p.client_name || 'Client'} · {p.services_required} · {p.capacity} · Due {getDeadline(p.created_at)}</p>
+              <div key={p.id} className="px-5 py-4">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-ink text-sm">{p.name}</p>
+                    <p className="text-xs text-gray-400">
+                      {p.client_name || 'Client'} · {p.services_required} · {p.capacity} kW
+                    </p>
+                    {p.deadline && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        Due {new Date(p.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                    )}
+                  </div>
+                  <div className="w-56 shrink-0">
+                    <Select projectId={p.id} current={p.assigned_to} />
+                  </div>
                 </div>
-                <div className="w-56 shrink-0">
-                  <Select projectId={p.id} current={p.assigned_to} />
+                {/* Scope Notes + Deadline inputs */}
+                <div className="flex gap-3 mt-2">
+                  <div className="flex-1 relative">
+                    <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={scopeNotes[p.id] || ''}
+                      onChange={e => setScopeNotes(prev => ({ ...prev, [p.id]: e.target.value }))}
+                      placeholder="Scope notes for designer..."
+                      className="input-field !py-1.5 !text-xs pl-8"
+                    />
+                  </div>
+                  <div className="w-40 relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                    <input
+                      type="date"
+                      value={deadlines[p.id] || getDeadline(p.created_at)}
+                      onChange={e => setDeadlines(prev => ({ ...prev, [p.id]: e.target.value }))}
+                      className="input-field !py-1.5 !text-xs pl-8"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -130,11 +185,16 @@ export default function ProjectAssignment() {
             <div key={p.id} className="px-5 py-4 flex items-center gap-4">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-ink text-sm">{p.name}</p>
-                <p className="text-xs text-gray-400">{p.client_name || 'Client'} · {p.services_required} · {p.capacity}</p>
+                <p className="text-xs text-gray-400">
+                  {p.client_name || 'Client'} · {p.services_required} · {p.capacity} kW
+                </p>
               </div>
               <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
                 <Calendar className="h-3 w-3" />
-                Due {getDeadline(p.created_at)}
+                {p.deadline
+                  ? new Date(p.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                  : `Due ${new Date(p.created_at).getDate() + 7 > 31 ? '1' : new Date(p.created_at).getDate() + 7} ${new Date(new Date(p.created_at).getTime() + 7*86400000).toLocaleDateString('en-IN', { month: 'short' })}`
+                }
               </div>
               <div className="w-56 shrink-0">
                 <Select projectId={p.id} current={p.assigned_to} />

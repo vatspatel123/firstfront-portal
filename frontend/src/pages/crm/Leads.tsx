@@ -85,7 +85,7 @@ export default function Leads() {
             <p className="p-8 text-center text-gray-500">No leads found</p>
           ) : (
             filtered.map((lead: any) => (
-              <Link key={lead.id} to={`/crm/leads/${lead.id}`} className="flex items-center justify-between p-4 hover:bg-gray-50">
+              <Link key={lead.id} to={`/sales/leads/${lead.id}`} className="flex items-center justify-between p-4 hover:bg-gray-50">
                 <div>
                   <p className="font-medium">{lead.name}</p>
                   <p className="text-sm text-gray-500">{lead.company}</p>

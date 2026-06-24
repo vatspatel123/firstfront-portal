@@ -34,7 +34,7 @@ async def list_messages(project_id: UUID = None, db: AsyncSession = Depends(get_
             text=msg.text,
             read=msg.read,
             created_at=msg.created_at,
-            sender_name=sender.email if sender else "",
+            sender_name=sender.name if sender else "",
             sender_avatar=""
         ))
     return response
@@ -58,7 +58,7 @@ async def send_message(req: MessageCreate, db: AsyncSession = Depends(get_db), u
         text=msg.text,
         read=msg.read,
         created_at=msg.created_at,
-        sender_name=user.email,
+        sender_name=user.name or user.email,
         sender_avatar=""
     )
 

@@ -38,7 +38,7 @@ export default function ActivityLog() {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const res = await api.get('/leads/activities')
+        const res = await api.get('/api/leads/activities')
         const items = res.data.map((a: any) => ({
           id: a.id,
           type: 'message',

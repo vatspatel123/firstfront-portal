@@ -1,39 +1,54 @@
 import { useState, useRef, useEffect } from 'react'
-import { Send, Paperclip, ArrowLeft } from 'lucide-react'
+import { Send, Paperclip, ArrowLeft, ChevronDown, FolderOpen } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useMessageStore, useProjectStore } from '../../store/useApiStores'
 import { useAuthStore } from '../../store/authStore'
 
 export default function Messages() {
   const [input, setInput] = useState('')
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const { messages, loading, fetchMessages, sendMessage } = useMessageStore()
-  const { projects, fetchProjects } = useProjectStore()
+  const { messages, fetchMessages, sendMessage } = useMessageStore()
+  const { projects, loading: projectsLoading, fetchProjects } = useProjectStore()
   const { user } = useAuthStore()
 
-  useEffect(() => { fetchMessages(); fetchProjects() }, [fetchMessages, fetchProjects])
+  useEffect(() => {
+    fetchProjects()
+  }, [])
 
-  const currentProject = projects[0]
-  const projectId = currentProject?.id || ''
+  useEffect(() => {
+    if (projects.length > 0 && !selectedProjectId) {
+      setSelectedProjectId(projects[0].id)
+    }
+  }, [projects])
 
-  if (loading) return (
+  useEffect(() => {
+    if (selectedProjectId) {
+      fetchMessages(selectedProjectId)
+    }
+  }, [selectedProjectId])
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+  }, [messages])
+
+  const send = async () => {
+    if (!input.trim() || !selectedProjectId) return
+    try {
+      await sendMessage(selectedProjectId, input)
+      setInput('')
+    } catch {
+      toast.error('Failed to send message')
+    }
+  }
+
+  if (projectsLoading) return (
     <div className="max-w-4xl mx-auto space-y-4">
       <div className="flex justify-center p-8">
         <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
       </div>
     </div>
   )
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages])
-
-  const send = () => {
-    if (!input.trim() || !projectId) return
-    sendMessage(projectId, input)
-    setInput('')
-    toast.success('Message sent')
-  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-4">
@@ -42,18 +57,33 @@ export default function Messages() {
       </button>
 
       <div className="bg-white rounded-xl border overflow-hidden flex flex-col h-[calc(100vh-12rem)]">
+        {/* Header with project selector */}
         <div className="px-5 py-4 border-b flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center">
-            {currentProject?.name?.[0] || 'P'}
+          <div className="flex-1 flex items-center gap-3">
+            <FolderOpen className="h-5 w-5 text-brand-500 shrink-0" />
+            <div className="relative">
+              <select
+                value={selectedProjectId || ''}
+                onChange={e => setSelectedProjectId(e.target.value)}
+                className="appearance-none font-medium text-gray-900 pr-6 bg-transparent border-none focus:ring-0 cursor-pointer text-sm"
+              >
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="font-medium text-gray-900">{currentProject?.name || 'Select a project'}</p>
-            <p className="text-xs text-gray-500">{messages.length} messages</p>
-          </div>
+          <div className="text-xs text-gray-400">{messages.length} messages</div>
         </div>
 
+        {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50">
-          {messages.length === 0 ? (
+          {!selectedProjectId ? (
+            <div className="text-center text-gray-400 py-8">
+              <p>Select a project to view messages</p>
+            </div>
+          ) : messages.length === 0 ? (
             <div className="text-center text-gray-400 py-8">
               <p>No messages yet. Start a conversation!</p>
             </div>
@@ -62,12 +92,14 @@ export default function Messages() {
               const isMe = m.sender_id === user?.id
               return (
                 <div key={m.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
-                  <div className="w-8 h-8 rounded-full bg-primary-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                  <div className={`w-8 h-8 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0 ${
+                    isMe ? 'bg-brand-500' : 'bg-primary-600'
+                  }`}>
                     {m.sender_name?.[0] || '?'}
                   </div>
                   <div className={`flex-1 max-w-[75%] ${isMe ? 'flex flex-col items-end' : ''}`}>
                     <div className={`rounded-2xl px-4 py-2.5 ${
-                      isMe ? 'bg-primary-600 text-white' : 'bg-white border border-gray-100'
+                      isMe ? 'bg-brand-500 text-white' : 'bg-white border border-gray-100'
                     }`}>
                       <p className="text-sm whitespace-pre-wrap">{m.text}</p>
                     </div>
@@ -81,6 +113,7 @@ export default function Messages() {
           )}
         </div>
 
+        {/* Input */}
         <div className="p-4 border-t bg-white">
           <div className="flex items-end gap-2">
             <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors">
@@ -90,11 +123,12 @@ export default function Messages() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-              placeholder="Type a message..."
+              placeholder={selectedProjectId ? "Type a message..." : "Select a project first..."}
+              disabled={!selectedProjectId}
               rows={1}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none max-h-32 focus:ring-2 focus:ring-primary-500"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none max-h-32 focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
             />
-            <button onClick={send} disabled={!input.trim() || !projectId} className="bg-primary-600 text-white p-2.5 rounded-lg hover:bg-primary-700 disabled:opacity-50">
+            <button onClick={send} disabled={!input.trim() || !selectedProjectId} className="bg-primary-600 text-white p-2.5 rounded-lg hover:bg-primary-700 disabled:opacity-50">
               <Send className="h-4 w-4" />
             </button>
           </div>

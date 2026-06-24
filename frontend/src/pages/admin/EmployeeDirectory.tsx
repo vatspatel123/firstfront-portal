@@ -52,7 +52,7 @@ export default function EmployeeDirectory() {
     e.preventDefault()
     setSubmitting(true)
     try {
-      await api.post('/employees/', form)
+      await api.post('/api/employees/', form)
       toast.success('Employee added successfully')
       setShowAdd(false)
       setForm({ name: '', role: '', department: 'design', email: '', phone: '', join_date: '', salary: '' })
@@ -149,7 +149,7 @@ export default function EmployeeDirectory() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
-                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Riya Sharma" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Full name" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Department</label>
@@ -159,7 +159,7 @@ export default function EmployeeDirectory() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Role</label>
-                  <input type="text" value={form.role} onChange={e => setForm({...form, role: e.target.value})} placeholder="e.g. Junior Designer" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                  <input type="text" value={form.role} onChange={e => setForm({...form, role: e.target.value})} placeholder="Job title" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Join Date</label>
@@ -167,16 +167,16 @@ export default function EmployeeDirectory() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                  <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="riya@firstfront.in" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                  <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="name@firstfront.in" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-                  <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+91 98765 00000" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                  <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+91 XXXXX XXXXX" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Salary</label>
-                <input type="text" value={form.salary} onChange={e => setForm({...form, salary: e.target.value})} placeholder="e.g. ₹4,00,000/year" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                <input type="text" value={form.salary} onChange={e => setForm({...form, salary: e.target.value})} placeholder="Annual salary" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
               </div>
               <div className="flex justify-end gap-2 mt-5 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>

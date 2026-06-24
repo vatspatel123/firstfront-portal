@@ -10,7 +10,7 @@ from app.models.client import Client
 from app.schemas.user import SignupRequest, LoginRequest, LoginResponse, VerifyOTPRequest
 from app.utils.jwt import create_access_token
 from app.utils.otp import create_and_send_otp, verify_otp
-from app.utils.auth import get_current_user
+from app.utils.auth import get_current_user, require_role
 
 router = APIRouter()
 
@@ -23,6 +23,14 @@ class ProfileUpdate(BaseModel):
 class PasswordUpdate(BaseModel):
     current_password: str
     new_password: str
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+    phone: str
+    password: str
+    role: str  # client, sales, designer, admin
+    company_name: Optional[str] = None
 
 @router.post("/signup")
 async def signup(req: SignupRequest, db: AsyncSession = Depends(get_db)):
@@ -181,3 +189,76 @@ async def update_password(
     user.password_hash = bcrypt.hash(req.new_password)
     await db.commit()
     return {"message": "Password updated"}
+
+
+@router.post("/create-user")
+async def admin_create_user(
+    req: CreateUserRequest,
+    db: AsyncSession = Depends(get_db),
+    user=Depends(require_role(UserRole.ADMIN))
+):
+    """Admin-only: Create a new user with any role (sales, designer, admin, client)"""
+    existing = await db.execute(
+        select(User).where((User.email == req.email) | (User.phone == req.phone))
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Email or phone already registered")
+
+    valid_roles = [r.value for r in UserRole]
+    if req.role not in valid_roles:
+        raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {valid_roles}")
+
+    password_hash = bcrypt.hash(req.password)
+    new_user = User(
+        email=req.email,
+        phone=req.phone,
+        password_hash=password_hash,
+        role=UserRole(req.role),
+        name=req.name,
+        is_verified=True  # Admin-created users are auto-verified
+    )
+    db.add(new_user)
+    await db.flush()
+
+    # If creating a client, also create client profile
+    if req.role == UserRole.CLIENT.value:
+        client = Client(
+            user_id=new_user.id,
+            company_name=req.company_name or req.name,
+            contact_person=req.name,
+        )
+        db.add(client)
+
+    await db.commit()
+    await db.refresh(new_user)
+
+    return {
+        "message": f"User created successfully",
+        "user_id": str(new_user.id),
+        "email": new_user.email,
+        "role": new_user.role.value,
+        "name": new_user.name
+    }
+
+
+@router.get("/users")
+async def list_users(
+    db: AsyncSession = Depends(get_db),
+    user=Depends(require_role(UserRole.ADMIN))
+):
+    """Admin-only: List all users"""
+    result = await db.execute(select(User).order_by(User.created_at.desc()))
+    users = result.scalars().all()
+    return [
+        {
+            "id": str(u.id),
+            "name": u.name,
+            "email": u.email,
+            "phone": u.phone,
+            "role": u.role.value,
+            "is_verified": u.is_verified,
+            "is_active": u.is_active,
+            "created_at": u.created_at.isoformat()
+        }
+        for u in users
+    ]
