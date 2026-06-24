@@ -1,0 +1,22 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - img [ref=e6]
+    - generic [ref=e12]:
+      - heading "First Front" [level=1] [ref=e13]
+      - paragraph [ref=e14]: Solar Design Portal
+  - generic [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]: Email
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - textbox [active] [ref=e22]: admin@firstfront.in
+    - generic [ref=e23]:
+      - generic [ref=e24]: Password
+      - generic [ref=e25]:
+        - img [ref=e26]
+        - textbox [ref=e29]
+    - button "Sign In" [ref=e30] [cursor=pointer]
+  - paragraph [ref=e31]:
+    - text: Don't have an account?
+    - link "Sign up" [ref=e32] [cursor=pointer]:
+      - /url: /signup

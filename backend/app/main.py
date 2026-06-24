@@ -11,7 +11,7 @@ app = FastAPI(title="First Front Portal & CRM", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url, "https://clever-dusk-256fb7.netlify.app", "https://boisterous-cat-f080ea.netlify.app", "http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
