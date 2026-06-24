@@ -25,8 +25,8 @@ export default function DesignerDayView() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await api.get('/projects/', { params: { assigned_to_me: true } })
-        const projects = res.data
+        const res = await api.get('/api/projects/', { params: { assigned_to_me: true } })
+        const projects = Array.isArray(res.data) ? res.data : []
         const taskList: DesignerTask[] = projects
           .filter((p: any) => ['assigned', 'design_in_progress'].includes(p.status))
           .map((p: any) => ({

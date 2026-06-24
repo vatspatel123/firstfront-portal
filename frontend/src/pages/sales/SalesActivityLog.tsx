@@ -21,7 +21,7 @@ export default function SalesActivityLog() {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const { data } = await API.get('/leads/activities')
+        const { data } = await API.get('/api/leads/activities')
         setActivities(data)
       } catch (error) {
         console.error('Failed to fetch activities')

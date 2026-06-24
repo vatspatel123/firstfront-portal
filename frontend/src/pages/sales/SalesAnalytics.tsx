@@ -14,7 +14,7 @@ export default function SalesAnalytics() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const { data } = await API.get('/leads/')
+        const { data } = await API.get('/api/leads/')
         setLeads(data)
       } catch { setLeads([]) }
       setLoading(false)

@@ -33,3 +33,4 @@ backend/.env
 
 # Local Netlify folder
 .netlify
+.playwright-mcp/

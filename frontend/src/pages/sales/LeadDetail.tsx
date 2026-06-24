@@ -24,10 +24,10 @@ export default function LeadDetail() {
 
   const fetchLeadData = async () => {
     try {
-      const { data } = await API.get(`/leads/${id}`)
+      const { data } = await API.get(`/api/leads/${id}`)
       setLead(data)
       try {
-        const { data: fups } = await API.get(`/leads/${id}/followups`)
+        const { data: fups } = await API.get(`/api/leads/${id}/followups`)
         setFollowups(fups)
       } catch { /* followups endpoint may not exist yet */ }
     } catch { /* handle error */ }
@@ -41,7 +41,7 @@ export default function LeadDetail() {
   const handleStatusUpdate = async (newStatus: string) => {
     if (!lead || !id) return
     try {
-      await API.patch(`/leads/${id}/status`, { status: newStatus })
+      await API.patch(`/api/leads/${id}/status`, { status: newStatus })
       setLead({ ...lead, status: newStatus })
       toast.success('Status updated')
     } catch (error) {
@@ -52,7 +52,7 @@ export default function LeadDetail() {
   const handleSaveNote = async () => {
     if (!newNote.trim() || !id) return
     try {
-      await API.post('/leads/followups', {
+      await API.post('/api/leads/followups', {
         lead_id: id,
         note: newNote,
         status: 'completed'
@@ -60,7 +60,7 @@ export default function LeadDetail() {
       toast.success('Note added')
       setNewNote('')
       // Refresh followups
-      const { data: fups } = await API.get(`/leads/${id}/followups`)
+      const { data: fups } = await API.get(`/api/leads/${id}/followups`)
       setFollowups(fups)
     } catch (error) {
       toast.error('Failed to add note')

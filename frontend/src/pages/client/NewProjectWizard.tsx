@@ -39,7 +39,7 @@ export default function NewProjectWizard() {
     setSubmitting(true)
     try {
       const selectedService = SERVICE_TYPES.find(s => s.id === service)
-      const res = await API.post('/projects/', {
+      const res = await API.post('/api/projects/', {
         name: `${selectedService?.name || 'Solar Design'} - ${location}`,
         location,
         capacity,

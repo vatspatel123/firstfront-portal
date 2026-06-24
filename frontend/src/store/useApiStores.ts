@@ -28,7 +28,7 @@ export const useEmployeeStore = create<{
   employees: [], loading: false,
   fetchEmployees: async () => {
     set({ loading: true })
-    try { const { data } = await API.get('/employees/'); set({ employees: data }) }
+    try { const { data } = await API.get('/api/employees/'); set({ employees: data }) }
     catch { set({ employees: [] }) }
     set({ loading: false })
   },
@@ -41,16 +41,16 @@ export const useLeaveStore = create<{
   leaves: [], loading: false,
   fetchLeaves: async () => {
     set({ loading: true })
-    try { const { data } = await API.get('/employees/leave/'); set({ leaves: data }) }
+    try { const { data } = await API.get('/api/employees/leave/'); set({ leaves: data }) }
     catch { set({ leaves: [] }) }
     set({ loading: false })
   },
   approveLeave: async (id) => {
-    await API.patch(`/employees/leave/${id}`, { status: 'approved' })
+    await API.patch(`/api/employees/leave/${id}`, { status: 'approved' })
     set((s) => ({ leaves: s.leaves.map(l => l.id === id ? { ...l, status: 'approved' } : l) }))
   },
   rejectLeave: async (id) => {
-    await API.patch(`/employees/leave/${id}`, { status: 'rejected' })
+    await API.patch(`/api/employees/leave/${id}`, { status: 'rejected' })
     set((s) => ({ leaves: s.leaves.map(l => l.id === id ? { ...l, status: 'rejected' } : l) }))
   },
 }))
@@ -61,7 +61,7 @@ export const useReviewStore = create<{
   reviews: [], loading: false,
   fetchReviews: async () => {
     set({ loading: true })
-    try { const { data } = await API.get('/employees/reviews/'); set({ reviews: data }) }
+    try { const { data } = await API.get('/api/employees/reviews/'); set({ reviews: data }) }
     catch { set({ reviews: [] }) }
     set({ loading: false })
   },
@@ -75,14 +75,14 @@ export const useMessageStore = create<{
   fetchMessages: async (projectId) => {
     set({ loading: true })
     try {
-      const url = projectId ? `/messages/?project_id=${projectId}` : '/messages/'
+      const url = projectId ? `/api/messages/?project_id=${projectId}` : '/api/messages/'
       const { data } = await API.get(url)
       set({ messages: data })
     } catch { set({ messages: [] }) }
     set({ loading: false })
   },
   sendMessage: async (projectId, text) => {
-    const { data } = await API.post('/messages/', { project_id: projectId, text })
+    const { data } = await API.post('/api/messages/', { project_id: projectId, text })
     set((s) => ({ messages: [...s.messages, data] }))
   },
 }))
@@ -93,7 +93,7 @@ export const useInvoiceStore = create<{
   invoices: [], loading: false,
   fetchInvoices: async () => {
     set({ loading: true })
-    try { const { data } = await API.get('/messages/invoices/'); set({ invoices: data }) }
+    try { const { data } = await API.get('/api/messages/invoices/'); set({ invoices: data }) }
     catch { set({ invoices: [] }) }
     set({ loading: false })
   },
@@ -115,18 +115,18 @@ export const useProjectStore = create<{
   fetchProjects: async (search) => {
     set({ loading: true })
     try {
-      const url = search ? `/projects/?search=${encodeURIComponent(search)}` : '/projects/'
+      const url = search ? `/api/projects/?search=${encodeURIComponent(search)}` : '/api/projects/'
       const { data } = await API.get(url)
       set({ projects: data })
     } catch { set({ projects: [] }) }
     set({ loading: false })
   },
   updateStatus: async (id, status) => {
-    await API.patch(`/projects/${id}/status`, { status })
+    await API.patch(`/api/projects/${id}/status`, { status })
     set((s) => ({ projects: s.projects.map(p => p.id === id ? { ...p, status } : p) }))
   },
   assignDesigner: async (id, assignedTo) => {
-    await API.patch(`/projects/${id}/status`, { status: 'assigned', assigned_to: assignedTo })
+    await API.patch(`/api/projects/${id}/status`, { status: 'assigned', assigned_to: assignedTo })
     set((s) => ({ projects: s.projects.map(p => p.id === id ? { ...p, assigned_to: assignedTo, status: 'assigned' } : p) }))
   },
 }))
@@ -144,23 +144,23 @@ export const useNotificationStore = create<{
   notifications: [], unreadCount: 0, loading: false,
   fetchNotifications: async () => {
     set({ loading: true })
-    try { const { data } = await API.get('/notifications/'); set({ notifications: data }) }
+    try { const { data } = await API.get('/api/notifications/'); set({ notifications: data }) }
     catch { set({ notifications: [] }) }
     set({ loading: false })
   },
   fetchUnreadCount: async () => {
-    try { const { data } = await API.get('/notifications/unread-count'); set({ unreadCount: data.count }) }
+    try { const { data } = await API.get('/api/notifications/unread-count'); set({ unreadCount: data.count }) }
     catch { set({ unreadCount: 0 }) }
   },
   markRead: async (id) => {
-    await API.patch(`/notifications/${id}/read`)
+    await API.patch(`/api/notifications/${id}/read`)
     set((s) => ({
       notifications: s.notifications.map(n => n.id === id ? { ...n, is_read: true } : n),
       unreadCount: Math.max(0, s.unreadCount - 1)
     }))
   },
   markAllRead: async () => {
-    await API.post('/notifications/mark-all-read')
+    await API.post('/api/notifications/mark-all-read')
     set((s) => ({
       notifications: s.notifications.map(n => ({ ...n, is_read: true })),
       unreadCount: 0

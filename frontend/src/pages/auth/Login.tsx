@@ -17,7 +17,9 @@ export default function Login() {
     try {
       await login(email, password)
       toast.success('Logged in successfully')
-      navigate('/portal')
+      const user = useAuthStore.getState().user
+      const roleMap: Record<string, string> = { admin: '/admin', sales: '/sales', designer: '/designer', client: '/portal' }
+      navigate(roleMap[user?.role ?? ''] || '/portal')
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Login failed')
     } finally {

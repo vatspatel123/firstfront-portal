@@ -31,7 +31,7 @@ export default function PerformanceDocs() {
         const allDocs: any[] = []
         for (const emp of employees.slice(0, 5)) {
           try {
-            const res = await API.get(`/employees/${emp.id}/documents`)
+            const res = await API.get(`/api/employees/${emp.id}/documents`)
             allDocs.push(...res.data.map((d: any) => ({ ...d, employee: emp.name, avatar: emp.avatar })))
           } catch {}
         }
