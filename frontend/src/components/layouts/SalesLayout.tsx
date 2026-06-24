@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { LayoutDashboard, Users, Briefcase, CalendarCheck, BarChart3, Activity, Settings, LogOut, Sun } from 'lucide-react'
+import { LayoutDashboard, Users, Briefcase, CalendarCheck, BarChart3, Activity, Settings, LogOut, Sun, Bell } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { path: '/sales/followups', label: 'Follow-ups', icon: CalendarCheck },
   { path: '/sales/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/sales/activity', label: 'Activity Log', icon: Activity },
+  { path: '/sales/notifications', label: 'Notifications', icon: Bell },
   { path: '/sales/settings', label: 'Settings', icon: Settings },
 ]
 

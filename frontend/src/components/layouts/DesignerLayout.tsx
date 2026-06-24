@@ -1,12 +1,14 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { LayoutDashboard, FolderOpen, MessageCircle, Settings, LogOut, Sun } from 'lucide-react'
+import { LayoutDashboard, FolderOpen, MessageCircle, Settings, LogOut, Sun, Bell, PenTool } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
   { path: '/designer', label: 'My Day', icon: LayoutDashboard },
   { path: '/designer/projects', label: 'Projects', icon: FolderOpen },
+  { path: '/designer/workspace', label: 'Workspace', icon: PenTool },
   { path: '/designer/messages', label: 'Messages', icon: MessageCircle },
+  { path: '/designer/notifications', label: 'Notifications', icon: Bell },
   { path: '/designer/settings', label: 'Settings', icon: Settings },
 ]
 

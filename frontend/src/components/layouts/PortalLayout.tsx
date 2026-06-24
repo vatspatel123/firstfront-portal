@@ -1,12 +1,16 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { LayoutDashboard, PlusCircle, History, LogOut, Sun } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, History, LogOut, Sun, FolderOpen, CreditCard, Bell, Settings } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
   { path: '/portal', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/portal/projects', label: 'My Projects', icon: FolderOpen },
   { path: '/portal/projects/new', label: 'New Project', icon: PlusCircle },
   { path: '/portal/history', label: 'Project History', icon: History },
+  { path: '/portal/billing', label: 'Billing', icon: CreditCard },
+  { path: '/portal/notifications', label: 'Notifications', icon: Bell },
+  { path: '/portal/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function PortalLayout() {
@@ -29,7 +33,7 @@ export default function PortalLayout() {
             <p className="text-xs text-primary-200">Client Portal</p>
           </div>
         </div>
-        <nav className="flex-1 px-4 space-y-1">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
           {navItems.map(item => (
             <Link
               key={item.path}
@@ -54,7 +58,7 @@ export default function PortalLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         <Outlet />
       </main>
     </div>

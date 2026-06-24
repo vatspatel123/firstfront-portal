@@ -102,7 +102,8 @@ export const useInvoiceStore = create<{
 export interface Project {
   id: string; client_id: string; name: string; location: string; capacity: string;
   project_type: string; services_required: string; notes: string | null;
-  status: string; assigned_to: string | null; created_at: string; updated_at: string;
+  status: string; assigned_to: string | null; priority: string | null;
+  deadline: string | null; created_at: string; updated_at: string;
   client_name?: string; designer_name?: string;
 }
 

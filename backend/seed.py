@@ -38,6 +38,14 @@ async def seed():
         )
         db.add(sales_user)
 
+        # Designer user (for login + assignment)
+        designer_user = User(
+            id=uuid.uuid4(), name="Priya Sharma", email="designer@firstfront.in", phone="9999999997",
+            password_hash=bcrypt.hash("designer123"), role=UserRole.DESIGNER,
+            is_verified=True, is_active=True
+        )
+        db.add(designer_user)
+
         # Client users
         clients_data = [
             ("acme@test.com", "8888888881", "Acme Solar Inc", "Rajesh Kumar", "Mumbai based solar installer"),
@@ -62,23 +70,25 @@ async def seed():
 
         # Projects
         projects_data = [
-            ("Shanti Niketan Roof", "Mumbai, Maharashtra", "10", "residential", "Design + Installation"),
-            ("GreenTech Office", "Pune, Maharashtra", "50", "commercial", "Feasibility + Design"),
-            ("Sunrise Factory", "Nagpur, Maharashtra", "200", "industrial", "Full EPC"),
-            ("Lake View Villa", "Lonavala", "8", "residential", "Design only"),
-            ("Mall Roof Project", "Thane", "100", "commercial", "Design + Installation"),
+            ("Shanti Niketan Roof", "Mumbai, Maharashtra", "10", "residential", "Design + Installation", "high", "new"),
+            ("GreenTech Office", "Pune, Maharashtra", "50", "commercial", "Feasibility + Design", "medium", "data_review"),
+            ("Sunrise Factory", "Nagpur, Maharashtra", "200", "industrial", "Full EPC", "high", "missing_data"),
+            ("Lake View Villa", "Lonavala", "8", "residential", "Design only", "low", "design_in_progress"),
+            ("Mall Roof Project", "Thane", "100", "commercial", "Design + Installation", "medium", "assigned"),
         ]
-        statuses = list(ProjectStatus)
-        for (user, client), (name, loc, cap, ptype, services) in zip(clients * 2, projects_data):
+        for (user, client), (name, loc, cap, ptype, services, priority, status_str) in zip(clients * 2, projects_data):
+            deadline = datetime.utcnow() + timedelta(days=[7, 14, 21, 10, 5][projects_data.index((name, loc, cap, ptype, services, priority, status_str)) % 5])
+            assigned = designer_user.id if status_str in ("assigned", "design_in_progress") else None
             project = Project(
                 client_id=client.id, name=name, location=loc,
                 capacity=cap, project_type=ptype, services_required=services,
-                status=statuses[projects_data.index((name, loc, cap, ptype, services)) % len(statuses)]
+                status=ProjectStatus(status_str), priority=priority, deadline=deadline,
+                assigned_to=assigned
             )
             db.add(project)
             await db.flush()
             log = ProjectStatusLog(
-                project_id=project.id, to_status=project.status.value,
+                project_id=project.id, to_status=status_str,
                 changed_by=clients[0][0].id, note="Project created"
             )
             db.add(log)
@@ -214,14 +224,6 @@ async def seed():
                 read=True if i < 3 else False
             )
             db.add(msg)
-
-        # Designer login user
-        designer_user = User(
-            id=uuid.uuid4(), name="Priya Sharma", email="designer@firstfront.in", phone="9999999997",
-            password_hash=bcrypt.hash("designer123"), role=UserRole.DESIGNER,
-            is_verified=True, is_active=True
-        )
-        db.add(designer_user)
 
         await db.commit()
         print("\n=== SEED COMPLETE — LOGIN CREDENTIALS ===")

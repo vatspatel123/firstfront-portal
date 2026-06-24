@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, Clock, AlertTriangle } from 'lucide-react'
-import api from '../../services/api'
+import { Clock, AlertTriangle, Play } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import API from '../../utils/api'
 
 interface DesignerTask {
   id: string
@@ -8,7 +9,7 @@ interface DesignerTask {
   task: string
   client: string
   priority: string
-  deadline: string
+  deadline: string | null
   status: string
 }
 
@@ -21,11 +22,12 @@ const priorityColors: Record<string, string> = {
 export default function DesignerDayView() {
   const [tasks, setTasks] = useState<DesignerTask[]>([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await api.get('/api/projects/', { params: { assigned_to_me: true } })
+        const res = await API.get('/api/projects/', { params: { assigned_to_me: true } })
         const projects = Array.isArray(res.data) ? res.data : []
         const taskList: DesignerTask[] = projects
           .filter((p: any) => ['assigned', 'design_in_progress'].includes(p.status))
@@ -33,9 +35,9 @@ export default function DesignerDayView() {
             id: p.id,
             project: p.name,
             task: p.services_required || 'Design work',
-            client: 'Client',
-            priority: p.status === 'design_in_progress' ? 'high' : 'medium',
-            deadline: 'Today',
+            client: p.client_name || 'Client',
+            priority: p.priority || (p.status === 'design_in_progress' ? 'high' : 'medium'),
+            deadline: p.deadline,
             status: p.status
           }))
         setTasks(taskList)
@@ -60,7 +62,7 @@ export default function DesignerDayView() {
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Today's Tasks</h1>
-        <p className="text-gray-500 mt-1">{tasks.length} tasks to complete</p>
+        <p className="text-gray-500 mt-1">{tasks.length} task{tasks.length !== 1 ? 's' : ''} assigned to you</p>
       </div>
 
       {tasks.length === 0 ? (
@@ -82,16 +84,22 @@ export default function DesignerDayView() {
                   <p className="text-sm text-gray-500">{t.task}</p>
                   <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
                     <span>Client: {t.client}</span>
-                    {t.deadline === 'Today' && (
-                      <span className="flex items-center gap-1 text-amber-600">
-                        <AlertTriangle className="h-3 w-3" /> Due today
+                    {t.deadline && (
+                      <span className={`flex items-center gap-1 ${new Date(t.deadline) < new Date() ? 'text-red-600' : 'text-amber-600'}`}>
+                        <AlertTriangle className="h-3 w-3" />
+                        Due {new Date(t.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </span>
                     )}
+                    <span className="text-gray-300">·</span>
+                    <span>{t.status.replace(/_/g, ' ')}</span>
                   </div>
                 </div>
-                <button className="bg-primary-600 text-white text-sm py-2 px-5 rounded-lg hover:bg-primary-700 shrink-0">
-                  {t.deadline === 'Today' ? 'Start Now' : 'Continue'}
-                  <ArrowRight className="h-4 w-4 ml-1 inline" />
+                <button
+                  onClick={() => navigate('/designer/workspace')}
+                  className="bg-primary-600 text-white text-sm py-2 px-5 rounded-lg hover:bg-primary-700 shrink-0 flex items-center gap-1"
+                >
+                  <Play className="h-4 w-4" />
+                  {t.status === 'design_in_progress' ? 'Continue' : 'Start'}
                 </button>
               </div>
             </div>

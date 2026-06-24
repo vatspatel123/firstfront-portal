@@ -1,16 +1,19 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { LayoutDashboard, Users, BarChart3, Calendar, ClipboardList, UserCheck, FileText, Settings, LogOut, Sun } from 'lucide-react'
+import { LayoutDashboard, Users, BarChart3, Calendar, ClipboardList, UserCheck, FileText, Settings, LogOut, Sun, Bell, Briefcase, CalendarCheck } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/admin/projects', label: 'Project Board', icon: ClipboardList },
-  { path: '/admin/team', label: 'Team', icon: Users },
+  { path: '/admin/assign', label: 'Assign Projects', icon: Briefcase },
+  { path: '/admin/team', label: 'Design Team', icon: Users },
   { path: '/admin/employees', label: 'Employees', icon: UserCheck },
+  { path: '/admin/leaves', label: 'Leave & Attendance', icon: CalendarCheck },
   { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/admin/capacity', label: 'Capacity', icon: Calendar },
   { path: '/admin/performance', label: 'Performance', icon: FileText },
+  { path: '/admin/notifications', label: 'Notifications', icon: Bell },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 

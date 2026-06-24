@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, ForeignKey, DateTime, Enum as SAEnum, Text, Float
+from sqlalchemy import String, ForeignKey, DateTime, Enum as SAEnum, Text, Float, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 import enum
@@ -13,7 +13,8 @@ class ProjectStatus(str, enum.Enum):
     DATA_COMPLETE = "data_complete"
     ASSIGNED = "assigned"
     DESIGN_IN_PROGRESS = "design_in_progress"
-    READY = "ready"
+    QA_REVIEW = "qa_review"
+    APPROVED = "approved"
     DELIVERED = "delivered"
 
 class Project(Base):
@@ -29,6 +30,8 @@ class Project(Base):
     notes: Mapped[str] = mapped_column(Text, nullable=True)
     status: Mapped[ProjectStatus] = mapped_column(SAEnum(ProjectStatus), default=ProjectStatus.NEW)
     assigned_to: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    priority: Mapped[str] = mapped_column(String(20), default="medium")
+    deadline: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

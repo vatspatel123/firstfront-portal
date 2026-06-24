@@ -7,7 +7,6 @@ const BOARD_COLUMNS = [
   { id: 'data_review', label: 'Data Review', color: 'border-primary-300', dot: 'bg-primary-500' },
   { id: 'in_design', label: 'In Design', color: 'border-amber-400', dot: 'bg-amber-500' },
   { id: 'qa_review', label: 'QA Review', color: 'border-purple-300', dot: 'bg-purple-500' },
-  { id: 'approved', label: 'Approved', color: 'border-green-300', dot: 'bg-green-500' },
   { id: 'delivered', label: 'Delivered', color: 'border-green-500', dot: 'bg-green-700' },
 ]
 
@@ -17,17 +16,14 @@ const priorityStyles: Record<string, string> = {
   low: 'bg-gray-100 text-gray-600',
 }
 
-// Map frontend column IDs to backend status values
 const COLUMN_TO_STATUS: Record<string, string> = {
   new: 'new',
   data_review: 'data_review',
   in_design: 'design_in_progress',
   qa_review: 'qa_review',
-  approved: 'approved',
   delivered: 'delivered',
 }
 
-// Map backend status values to frontend column IDs
 const STATUS_TO_COLUMN: Record<string, string> = {
   new: 'new',
   data_review: 'data_review',
@@ -36,7 +32,7 @@ const STATUS_TO_COLUMN: Record<string, string> = {
   assigned: 'in_design',
   design_in_progress: 'in_design',
   qa_review: 'qa_review',
-  approved: 'approved',
+  approved: 'delivered',
   delivered: 'delivered',
 }
 
@@ -83,12 +79,6 @@ export default function ProjectBoard() {
     acc[col.id] = projects.filter(p => STATUS_TO_COLUMN[p.status] === col.id).length
     return acc
   }, {} as Record<string, number>)
-
-  const getDeadline = (createdAtStr: string) => {
-    const d = new Date(createdAtStr)
-    d.setDate(d.getDate() + 7)
-    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-  }
 
   if (loading) {
     return (
@@ -166,7 +156,7 @@ export default function ProjectBoard() {
                       <p className="text-xs text-gray-400 mb-2">{p.client_name || 'Client'}</p>
                       <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
                         <Calendar className="h-3 w-3" />
-                        <span>Due {getDeadline(p.created_at)}</span>
+                        <span>Due {p.deadline ? new Date(p.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'No deadline'}</span>
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t border-gray-50">
                         <div className="flex items-center gap-1.5">

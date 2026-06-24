@@ -10,6 +10,8 @@ class ProjectCreate(BaseModel):
     project_type: str
     services_required: str
     notes: Optional[str] = None
+    deadline: Optional[datetime] = None
+    priority: Optional[str] = "medium"
 
 class ProjectResponse(BaseModel):
     id: UUID
@@ -22,13 +24,19 @@ class ProjectResponse(BaseModel):
     notes: Optional[str]
     status: str
     assigned_to: Optional[UUID]
+    priority: Optional[str]
+    deadline: Optional[datetime]
     created_at: datetime
     updated_at: datetime
+    client_name: Optional[str] = None
+    designer_name: Optional[str] = None
 
 class ProjectStatusUpdate(BaseModel):
     status: str
     note: Optional[str] = None
     assigned_to: Optional[UUID] = None
+    deadline: Optional[datetime] = None
+    priority: Optional[str] = None
 
 class ProjectFileResponse(BaseModel):
     id: UUID

@@ -1,68 +1,107 @@
 import { useState, useEffect } from 'react'
-import { CheckSquare, Square, Upload, FileText, Download } from 'lucide-react'
-import { useProjectStore } from '../../store/useApiStores'
+import { CheckSquare, Square, Upload, FileText, Download, FolderOpen } from 'lucide-react'
 import API from '../../utils/api'
 import toast from 'react-hot-toast'
 
-const checklist = [
+const DEFAULT_CHECKLIST = [
   { id: 1, label: 'Review uploaded site photos', done: false },
-  { id: 2, label: 'Verify site address and KML', done: true },
-  { id: 3, label: 'Run shadow analysis (Skelion)', done: false },
+  { id: 2, label: 'Verify site address and KML', done: false },
+  { id: 3, label: 'Run shadow analysis', done: false },
   { id: 4, label: 'Generate 3D layout', done: false },
   { id: 5, label: 'Prepare report PDF', done: false },
 ]
 
 export default function ProjectWorkspace() {
-  const { projects, fetchProjects } = useProjectStore()
-  const activeProject = projects.find(p => p.status === 'design_in_progress' || p.status === 'assigned')
-  
-  const [items, setItems] = useState(checklist)
+  const [projects, setProjects] = useState<any[]>([])
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [items, setItems] = useState(DEFAULT_CHECKLIST)
   const [outputs, setOutputs] = useState<any[]>([])
+  const [inputs, setInputs] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const activeProject = projects.find(p => p.id === selectedId) || projects.find(p => ['assigned', 'design_in_progress'].includes(p.status))
 
   useEffect(() => {
-    fetchProjects()
+    const load = async () => {
+      try {
+        const res = await API.get('/api/projects/', { params: { assigned_to_me: true } })
+        const data = Array.isArray(res.data) ? res.data : []
+        setProjects(data)
+      } catch (err) {
+        console.error('Failed to load projects', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
   }, [])
 
   useEffect(() => {
     if (activeProject) {
-      fetchOutputs()
+      fetchFiles()
+      setSelectedId(activeProject.id)
     }
-  }, [activeProject])
+  }, [activeProject?.id])
 
-  const fetchOutputs = async () => {
+  const fetchFiles = async () => {
     if (!activeProject) return
     try {
-      const { data } = await API.get(`/files/outputs/${activeProject.id}`)
-      setOutputs(data)
+      const [outRes, inRes] = await Promise.all([
+        API.get(`/api/files/${activeProject.id}/outputs`),
+        API.get(`/api/files/${activeProject.id}`)
+      ])
+      setOutputs(Array.isArray(outRes.data) ? outRes.data : [])
+      setInputs(Array.isArray(inRes.data) ? inRes.data : [])
     } catch (err) {
-      console.error('Failed to load outputs', err)
+      console.error('Failed to load files', err)
     }
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOutputUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !activeProject) return
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)
     try {
-      await API.post(`/files/output/${activeProject.id}`, formData, {
+      await API.post(`/api/files/output/${activeProject.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      toast.success('Output file uploaded successfully')
-      fetchOutputs()
+      toast.success('File uploaded successfully')
+      fetchFiles()
     } catch (err) {
-      toast.error('Failed to upload output file')
+      toast.error('Failed to upload file')
     } finally {
       setUploading(false)
       if (e.target) e.target.value = ''
     }
   }
 
-  const downloadFile = async (fileId: string, name: string) => {
+  const handleInputUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !activeProject) return
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
     try {
-      const response = await API.get(`/files/download-output/${fileId}`, { responseType: 'blob' })
+      await API.post(`/api/files/upload/${activeProject.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      toast.success('File uploaded successfully')
+      fetchFiles()
+    } catch (err) {
+      toast.error('Failed to upload file')
+    } finally {
+      setUploading(false)
+      if (e.target) e.target.value = ''
+    }
+  }
+
+  const downloadFile = async (fileId: string, name: string, type: 'input' | 'output') => {
+    try {
+      const url = type === 'output' ? `/api/files/download-output/${fileId}` : `/api/files/download/${fileId}`
+      const response = await API.get(url, { responseType: 'blob' })
       const blobUrl = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = blobUrl
@@ -77,64 +116,129 @@ export default function ProjectWorkspace() {
 
   const toggleItem = (id: number) => setItems(items.map(i => i.id === id ? { ...i, done: !i.done } : i))
 
+  const progress = items.length > 0 ? (items.filter(i => i.done).length / items.length) * 100 : 0
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-8">
+        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+      </div>
+    )
+  }
+
   if (!activeProject) return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div className="card p-12 text-center">
-        <h3 className="font-display font-medium text-ink">No Active Project</h3>
-        <p className="text-sm text-gray-500 mt-1">You have no projects currently in design. Check your tasks.</p>
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900">Project Workspace</h1>
+        <p className="text-gray-500 mt-1">Select a project to start working</p>
+      </div>
+      <div className="bg-white rounded-xl border p-12 text-center">
+        <FolderOpen className="h-12 w-12 text-gray-200 mx-auto mb-3" />
+        <h3 className="font-medium text-gray-900">No Assigned Projects</h3>
+        <p className="text-sm text-gray-500 mt-1">Ask admin to assign you a project first</p>
       </div>
     </div>
   )
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink">Project Workspace</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Project Workspace</h1>
         <p className="text-gray-500 mt-1">{activeProject.name} · {activeProject.location}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card p-5">
-          <h2 className="font-display font-semibold text-ink mb-4">Design Checklist</h2>
-          <div className="space-y-3">
+      {/* Project Selector */}
+      {projects.length > 1 && (
+        <div className="bg-white rounded-xl border p-4">
+          <p className="text-sm font-medium text-gray-700 mb-2">Switch Project</p>
+          <div className="flex gap-2 flex-wrap">
+            {projects.filter(p => ['assigned', 'design_in_progress'].includes(p.status)).map(p => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedId(p.id)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  activeProject.id === p.id
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Checklist */}
+        <div className="bg-white rounded-xl border p-5">
+          <h2 className="font-semibold text-gray-900 mb-4">Design Checklist</h2>
+          <div className="space-y-2">
             {items.map((item) => (
               <button key={item.id} onClick={() => toggleItem(item.id)}
                 className="w-full flex items-center gap-3 text-left transition-colors hover:bg-gray-50 rounded-lg p-2 -mx-2">
                 {item.done ? (
-                  <CheckSquare className="h-5 w-5 text-success shrink-0" />
+                  <CheckSquare className="h-5 w-5 text-green-500 shrink-0" />
                 ) : (
                   <Square className="h-5 w-5 text-gray-300 shrink-0" />
                 )}
-                <span className={`text-sm ${item.done ? 'text-gray-400 line-through' : 'text-ink'}`}>{item.label}</span>
+                <span className={`text-sm ${item.done ? 'text-gray-400 line-through' : 'text-gray-900'}`}>{item.label}</span>
               </button>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-50">
+          <div className="mt-4 pt-4 border-t">
             <div className="w-full bg-gray-100 rounded-full h-2">
-              <div className="bg-brand-500 h-2 rounded-full transition-all" style={{ width: `${(items.filter(i => i.done).length / items.length) * 100}%` }} />
+              <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
             </div>
             <p className="text-xs text-gray-400 mt-1">{items.filter(i => i.done).length}/{items.length} complete</p>
           </div>
         </div>
 
-        <div className="card p-5">
-          <h2 className="font-display font-semibold text-ink mb-4">Upload Output Files</h2>
-          <label className="block border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-brand-500/50 transition-colors cursor-pointer">
-            <Upload className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">{uploading ? 'Uploading...' : 'Drop files or click to upload'}</p>
-            <p className="text-xs text-gray-400 mt-1">PDFs, images, CAD files</p>
-            <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
-          </label>
-          <div className="mt-4 space-y-2">
-            {outputs.map(o => (
-              <div key={o.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-ink">{o.original_name}</span>
+        {/* Files */}
+        <div className="space-y-4">
+          {/* Output Files */}
+          <div className="bg-white rounded-xl border p-5">
+            <h2 className="font-semibold text-gray-900 mb-4">Design Outputs</h2>
+            <label className="block border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-primary-300 transition-colors cursor-pointer">
+              <Upload className="h-6 w-6 text-gray-300 mx-auto mb-1" />
+              <p className="text-sm text-gray-500">{uploading ? 'Uploading...' : 'Upload deliverables'}</p>
+              <input type="file" className="hidden" onChange={handleOutputUpload} disabled={uploading} />
+            </label>
+            <div className="mt-3 space-y-2">
+              {outputs.map(o => (
+                <div key={o.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-900">{o.original_name}</span>
+                  </div>
+                  <Download onClick={() => downloadFile(o.id, o.original_name, 'output')} className="h-4 w-4 text-gray-300 hover:text-primary-500 cursor-pointer transition-colors" />
                 </div>
-                <Download onClick={() => downloadFile(o.id, o.original_name)} className="h-4 w-4 text-gray-300 hover:text-brand-500 cursor-pointer transition-colors" />
-              </div>
-            ))}
+              ))}
+              {outputs.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No outputs uploaded yet</p>}
+            </div>
+          </div>
+
+          {/* Input Files */}
+          <div className="bg-white rounded-xl border p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-gray-900">Site Data</h2>
+              <label className="text-xs text-primary-600 hover:text-primary-700 cursor-pointer flex items-center gap-1">
+                <Upload className="h-3 w-3" /> Upload
+                <input type="file" className="hidden" onChange={handleInputUpload} disabled={uploading} />
+              </label>
+            </div>
+            <div className="space-y-2">
+              {inputs.map(f => (
+                <div key={f.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-900">{f.original_name}</span>
+                  </div>
+                  <Download onClick={() => downloadFile(f.id, f.original_name, 'input')} className="h-4 w-4 text-gray-300 hover:text-primary-500 cursor-pointer transition-colors" />
+                </div>
+              ))}
+              {inputs.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No site data uploaded yet</p>}
+            </div>
           </div>
         </div>
       </div>
