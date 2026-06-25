@@ -12,6 +12,7 @@ from app.schemas.employee import (
     ReviewCreate, ReviewResponse
 )
 from app.utils.auth import get_current_user
+from app.models.note import AuditLog
 
 router = APIRouter()
 
@@ -65,6 +66,21 @@ async def create_employee(req: EmployeeCreate, db: AsyncSession = Depends(get_db
     db.add(employee)
     await db.commit()
     await db.refresh(employee)
+
+    # Audit log
+    audit = AuditLog(
+        user_id=user.id,
+        user_name=user.name or user.email,
+        user_role=user.role.value,
+        action=f"Employee created: {req.name} ({req.role})",
+        entity_type="employee",
+        entity_id=str(employee.id),
+        entity_name=req.name,
+        details=f"Email: {req.email}, Role: {req.role}, Department: {req.department}"
+    )
+    db.add(audit)
+    await db.commit()
+
     return employee
 
 

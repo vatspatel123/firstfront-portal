@@ -12,7 +12,7 @@ from app.schemas.project import (ProjectCreate, ProjectResponse, ProjectStatusUp
                                  ProjectFileResponse, ProjectOutputResponse)
 from app.utils.auth import get_current_user, get_current_client
 from app.services.file_storage import save_upload, get_file_path
-from app.models.note import Notification
+from app.models.note import Notification, AuditLog
 from fastapi.responses import FileResponse
 
 router = APIRouter()
@@ -182,13 +182,30 @@ async def update_project_status(
         if client:
             notif_user_id = client.user_id
     if notif_user_id and str(notif_user_id) != str(user.id):
+        if req.status == 'assigned' and req.assigned_to:
+            notif_msg = f"You have been assigned to project '{project.name}'"
+        else:
+            notif_msg = f"Project '{project.name}' status updated to {status_label}"
         notification = Notification(
             user_id=notif_user_id,
-            type="status_change",
-            message=f"Project '{project.name}' status updated to {status_label}" + (f" — {req.note}" if req.note else ""),
+            type="assignment" if req.status == 'assigned' else "status_change",
+            message=notif_msg + (f" — {req.note}" if req.note else ""),
             related_id=project.id
         )
         db.add(notification)
+
+    # Audit log
+    audit = AuditLog(
+        user_id=user.id,
+        user_name=user.name or user.email,
+        user_role=user.role.value,
+        action=f"Status changed: {old_status} → {req.status}",
+        entity_type="project",
+        entity_id=str(project.id),
+        entity_name=project.name,
+        details=req.note
+    )
+    db.add(audit)
 
     await db.commit()
 

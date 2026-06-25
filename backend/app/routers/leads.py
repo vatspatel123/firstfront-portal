@@ -9,7 +9,8 @@ from app.models.lead import Lead, LeadStatus, FollowUp, SalesActivity
 from app.schemas.lead import (LeadCreate, LeadResponse, LeadStatusUpdate,
                               FollowUpCreate, FollowUpResponse,
                               SalesActivityCreate, SalesActivityResponse)
-from app.utils.auth import get_current_user, require_role
+from app.utils.auth import get_current_user
+from app.models.note import AuditLog
 
 router = APIRouter()
 
@@ -78,9 +79,23 @@ async def update_lead_status(lead_id: UUID, req: LeadStatusUpdate, db: AsyncSess
     lead = result.scalar_one_or_none()
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
+    old_status = lead.status.value
     lead.status = LeadStatus(req.status)
     if req.assigned_to:
         lead.assigned_to = req.assigned_to
+
+    # Audit log
+    audit = AuditLog(
+        user_id=user.id,
+        user_name=user.name or user.email,
+        user_role=user.role.value,
+        action=f"Lead status changed: {old_status} → {req.status}",
+        entity_type="lead",
+        entity_id=str(lead.id),
+        entity_name=lead.name,
+    )
+    db.add(audit)
+
     await db.commit()
     return {"message": "Lead status updated"}
 

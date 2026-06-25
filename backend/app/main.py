@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, projects, leads, files, ai, dashboard, messages, employees, notifications
+from app.routers import auth, projects, leads, files, ai, dashboard, messages, employees, notifications, audit
 
 settings = get_settings()
 
@@ -124,3 +124,4 @@ app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"]
 app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
 app.include_router(employees.router, prefix="/api/employees", tags=["Employees"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(audit.router, prefix="/api/audit", tags=["Audit Log"])

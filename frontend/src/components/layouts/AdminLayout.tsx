@@ -1,5 +1,5 @@
 import SidebarLayout from './SidebarLayout'
-import { LayoutDashboard, Users, BarChart3, Calendar, ClipboardList, UserCheck, FileText, Settings, Bell, Briefcase, CalendarCheck, Wrench } from 'lucide-react'
+import { LayoutDashboard, Users, BarChart3, Calendar, ClipboardList, UserCheck, FileText, Settings, Bell, Briefcase, CalendarCheck, Wrench, Shield } from 'lucide-react'
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,6 +12,7 @@ const navItems = [
   { path: '/admin/capacity', label: 'Capacity', icon: Calendar },
   { path: '/admin/performance', label: 'Performance', icon: FileText },
   { path: '/admin/tools', label: 'Tools', icon: Wrench },
+  { path: '/admin/audit', label: 'Audit Log', icon: Shield },
   { path: '/admin/notifications', label: 'Notifications', icon: Bell },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ]

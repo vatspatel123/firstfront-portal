@@ -25,3 +25,18 @@ class Notification(Base):
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
     related_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
+    user_name: Mapped[str] = mapped_column(String(255), default="")
+    user_role: Mapped[str] = mapped_column(String(50), default="")
+    action: Mapped[str] = mapped_column(String(255))
+    entity_type: Mapped[str] = mapped_column(String(100))
+    entity_id: Mapped[str] = mapped_column(String(100), nullable=True)
+    entity_name: Mapped[str] = mapped_column(String(500), nullable=True)
+    details: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

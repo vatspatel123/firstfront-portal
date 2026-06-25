@@ -21,6 +21,7 @@ import CapacityCalendar from './pages/admin/CapacityCalendar'
 import PerformanceDocs from './pages/admin/PerformanceDocs'
 import ProjectAssignment from './pages/admin/ProjectAssignment'
 import LeaveAttendance from './pages/admin/LeaveAttendance'
+import AuditLog from './pages/admin/AuditLog'
 
 import SalesDashboard from './pages/sales/SalesDashboard'
 import SalesLeads from './pages/crm/Leads'
@@ -29,6 +30,7 @@ import SalesProjects from './pages/crm/Projects'
 import SalesFollowups from './pages/crm/Followups'
 import SalesAnalytics from './pages/sales/SalesAnalytics'
 import SalesActivityLog from './pages/sales/SalesActivityLog'
+import SalesProjectReview from './pages/sales/SalesProjectReview'
 
 import DesignerDayView from './pages/designer/DesignerDayView'
 import DesignerProjects from './pages/crm/Projects'
@@ -89,6 +91,7 @@ export default function App() {
           <Route path="capacity" element={<CapacityCalendar />} />
           <Route path="performance" element={<PerformanceDocs />} />
           <Route path="tools" element={<Tools />} />
+          <Route path="audit" element={<AuditLog />} />
           <Route path="settings" element={<Settings />} />
           <Route path="notifications" element={<Notifications />} />
         </Route>
@@ -99,6 +102,7 @@ export default function App() {
           <Route path="leads" element={<SalesLeads />} />
           <Route path="leads/:id" element={<SalesLeadDetail />} />
           <Route path="projects" element={<SalesProjects />} />
+          <Route path="review" element={<SalesProjectReview />} />
           <Route path="followups" element={<SalesFollowups />} />
           <Route path="analytics" element={<SalesAnalytics />} />
           <Route path="activity" element={<SalesActivityLog />} />

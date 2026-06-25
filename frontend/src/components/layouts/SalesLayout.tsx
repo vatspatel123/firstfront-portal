@@ -1,9 +1,10 @@
 import SidebarLayout from './SidebarLayout'
-import { LayoutDashboard, Users, Briefcase, CalendarCheck, BarChart3, Activity, Settings, Bell } from 'lucide-react'
+import { LayoutDashboard, Users, Briefcase, CalendarCheck, BarChart3, Activity, Settings, Bell, ClipboardCheck } from 'lucide-react'
 
 const navItems = [
   { path: '/sales', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/sales/leads', label: 'Leads', icon: Users },
+  { path: '/sales/review', label: 'Project Review', icon: ClipboardCheck },
   { path: '/sales/projects', label: 'Projects', icon: Briefcase },
   { path: '/sales/followups', label: 'Follow-ups', icon: CalendarCheck },
   { path: '/sales/analytics', label: 'Analytics', icon: BarChart3 },
