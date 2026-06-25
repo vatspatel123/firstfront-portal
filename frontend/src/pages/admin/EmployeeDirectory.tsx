@@ -1,31 +1,35 @@
 import { useState, useEffect } from 'react'
-import { Search, Plus, Mail, Phone, Calendar, MoreVertical, X } from 'lucide-react'
+import { Search, Plus, Mail, Phone, Calendar, MoreVertical, X, CheckCircle, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useEmployeeStore } from '../../store/useApiStores'
 import api from '../../services/api'
 
 const departments = ['All', 'design', 'operations', 'sales', 'quality', 'finance', 'hr']
 const departmentLabels: Record<string, string> = {
-  design: 'Design',
-  operations: 'Operations',
-  sales: 'Sales',
-  quality: 'Quality',
-  finance: 'Finance',
-  hr: 'HR',
+  design: 'Design', operations: 'Operations', sales: 'Sales',
+  quality: 'Quality', finance: 'Finance', hr: 'HR',
 }
 const statusStyles: Record<string, string> = {
   active: 'bg-green-100 text-green-700',
   probation: 'bg-amber-100 text-amber-700',
   inactive: 'bg-gray-100 text-gray-500',
 }
+const systemRoles = [
+  { value: 'designer', label: 'Designer', desc: 'Can view assigned projects, upload files, update status' },
+  { value: 'sales', label: 'Sales', desc: 'Can manage leads, follow-ups, view sales analytics' },
+  { value: 'admin', label: 'Admin', desc: 'Full access to all features' },
+  { value: 'client', label: 'Client', desc: 'Can view own projects, submit requests via portal' },
+]
 
 export default function EmployeeDirectory() {
   const [search, setSearch] = useState('')
   const [dept, setDept] = useState('All')
   const [showAdd, setShowAdd] = useState(false)
+  const [showCredentials, setShowCredentials] = useState<any>(null)
   const { employees: EMPLOYEES, loading, fetchEmployees } = useEmployeeStore()
   const [form, setForm] = useState({
-    name: '', role: '', department: 'design', email: '', phone: '', join_date: '', salary: '', password: 'firstfront123'
+    name: '', role: 'designer', department: 'design', email: '', phone: '',
+    join_date: '', salary: '', password: 'firstfront123', system_role: 'designer',
   })
   const [submitting, setSubmitting] = useState(false)
 
@@ -52,16 +56,31 @@ export default function EmployeeDirectory() {
     e.preventDefault()
     setSubmitting(true)
     try {
-      await api.post('/api/employees/', form)
-      toast.success('Employee added successfully')
+      await api.post('/api/employees/', {
+        ...form,
+        role: form.system_role,
+      })
+      toast.success('Employee added — login credentials created')
       setShowAdd(false)
-      setForm({ name: '', role: '', department: 'design', email: '', phone: '', join_date: '', salary: '', password: 'firstfront123' })
+      setShowCredentials({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.system_role,
+      })
+      setForm({ name: '', role: 'designer', department: 'design', email: '', phone: '', join_date: '', salary: '', password: 'firstfront123', system_role: 'designer' })
       fetchEmployees()
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to add employee')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const copyCredentials = () => {
+    const text = `Login credentials for First Front Portal:\nEmail: ${showCredentials.email}\nPassword: ${showCredentials.password}\nRole: ${showCredentials.role}`
+    navigator.clipboard.writeText(text)
+    toast.success('Credentials copied to clipboard')
   }
 
   return (
@@ -138,9 +157,12 @@ export default function EmployeeDirectory() {
 
       {showAdd && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowAdd(false)}>
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-lg text-gray-900">Add New Employee</h2>
+              <div>
+                <h2 className="font-semibold text-lg text-gray-900">Add New Employee</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Creates employee record + login credentials</p>
+              </div>
               <button onClick={() => setShowAdd(false)} className="p-1 hover:bg-gray-100 rounded">
                 <X className="h-5 w-5 text-gray-500" />
               </button>
@@ -152,14 +174,17 @@ export default function EmployeeDirectory() {
                   <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Full name" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
                 </div>
                 <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">System Role</label>
+                  <select value={form.system_role} onChange={e => setForm({...form, system_role: e.target.value, role: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    {systemRoles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                  </select>
+                  <p className="text-[10px] text-gray-400 mt-0.5">{systemRoles.find(r => r.value === form.system_role)?.desc}</p>
+                </div>
+                <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Department</label>
                   <select value={form.department} onChange={e => setForm({...form, department: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     {departments.filter(d => d !== 'All').map(d => <option key={d} value={d}>{departmentLabels[d]}</option>)}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Role</label>
-                  <input type="text" value={form.role} onChange={e => setForm({...form, role: e.target.value})} placeholder="Job title" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Join Date</label>
@@ -180,8 +205,8 @@ export default function EmployeeDirectory() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Login Password</label>
-                <input type="text" value={form.password} onChange={e => setForm({...form, password: e.target.value})} placeholder="Password for login" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
-                <p className="text-xs text-gray-400 mt-1">Default: firstfront123</p>
+                <input type="text" value={form.password} onChange={e => setForm({...form, password: e.target.value})} placeholder="Password for login" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+                <p className="text-xs text-gray-400 mt-1">Employee will use this to log in to the portal</p>
               </div>
               <div className="flex justify-end gap-2 mt-5 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
@@ -190,6 +215,49 @@ export default function EmployeeDirectory() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showCredentials && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowCredentials(null)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-lg text-gray-900">Employee Added</h2>
+                <p className="text-xs text-gray-500">Login credentials created successfully</p>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2 mb-4">
+              <div className="flex justify-between">
+                <span className="text-xs text-gray-500">Name</span>
+                <span className="text-sm font-medium text-gray-900">{showCredentials.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-xs text-gray-500">Email</span>
+                <span className="text-sm font-medium text-gray-900">{showCredentials.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-xs text-gray-500">Password</span>
+                <span className="text-sm font-mono font-medium text-gray-900">{showCredentials.password}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-xs text-gray-500">Role</span>
+                <span className="text-sm font-medium text-gray-900 capitalize">{showCredentials.role}</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-4">Share these credentials with the employee. They can log in at the portal.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowCredentials(null)} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Close
+              </button>
+              <button onClick={copyCredentials} className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center justify-center gap-2">
+                <Copy className="h-4 w-4" /> Copy Credentials
+              </button>
+            </div>
           </div>
         </div>
       )}
