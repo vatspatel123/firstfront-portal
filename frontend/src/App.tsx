@@ -44,6 +44,7 @@ import ClientMyProjects from './pages/client/MyProjects'
 
 import Settings from './pages/shared/Settings'
 import Notifications from './pages/shared/Notifications'
+import Tools from './pages/shared/Tools'
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { user, token } = useAuthStore()
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="capacity" element={<CapacityCalendar />} />
           <Route path="performance" element={<PerformanceDocs />} />
+          <Route path="tools" element={<Tools />} />
           <Route path="settings" element={<Settings />} />
           <Route path="notifications" element={<Notifications />} />
         </Route>
@@ -110,6 +112,7 @@ export default function App() {
           <Route path="projects" element={<DesignerProjects />} />
           <Route path="workspace" element={<ProjectWorkspace />} />
           <Route path="messages" element={<DesignerMessages />} />
+          <Route path="tools" element={<Tools />} />
           <Route path="settings" element={<Settings />} />
           <Route path="notifications" element={<Notifications />} />
         </Route>
