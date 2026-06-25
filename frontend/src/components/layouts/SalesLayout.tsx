@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { LayoutDashboard, Users, Briefcase, CalendarCheck, BarChart3, Activity, Settings, LogOut, Sun, Bell } from 'lucide-react'
+import { LayoutDashboard, Users, Briefcase, CalendarCheck, BarChart3, Activity, Settings, LogOut, Bell } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
@@ -27,12 +27,9 @@ export default function SalesLayout() {
   return (
     <div className="min-h-screen flex">
       <aside className="w-64 bg-primary-800 text-white flex flex-col">
-        <div className="p-6 flex items-center gap-3">
-          <Sun className="h-8 w-8 text-solar-500" />
-          <div>
-            <h1 className="font-bold text-lg">First Front</h1>
-            <p className="text-xs text-primary-200">Sales</p>
-          </div>
+        <div className="p-4">
+          <img src="/logo.svg" alt="First Front Solar Energy" className="w-full h-auto" />
+          <p className="text-xs text-primary-200 mt-1 ml-1">Sales</p>
         </div>
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
           {navItems.map(item => (

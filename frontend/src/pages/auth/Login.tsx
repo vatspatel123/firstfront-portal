@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { Sun, Mail, Lock } from 'lucide-react'
+import { Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function Login() {
@@ -30,12 +30,9 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-800 to-primary-900 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        <div className="flex items-center gap-3 mb-8">
-          <Sun className="h-10 w-10 text-solar-500" />
-          <div>
-            <h1 className="text-2xl font-bold text-primary-800">First Front</h1>
-            <p className="text-sm text-gray-500">Solar Design Portal</p>
-          </div>
+        <div className="mb-8">
+          <img src="/logo.svg" alt="First Front Solar Energy" className="w-48 h-auto" />
+          <p className="text-sm text-gray-500 mt-2">Solar Design Portal</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
