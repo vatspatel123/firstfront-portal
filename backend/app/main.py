@@ -86,6 +86,28 @@ async def startup():
                     db.add(Notification(user_id=admin.id, type="info", message=msg, is_read=False))
 
                 await db.commit()
+            else:
+                # Migration: create User for any Employee without a login account
+                from app.models.employee import Employee
+                from app.models.user import UserRole
+                from passlib.hash import bcrypt
+                import uuid as _uuid
+
+                result = await db.execute(select(Employee))
+                employees = result.scalars().all()
+                role_map = {"designer": UserRole.DESIGNER, "sales": UserRole.SALES, "admin": UserRole.ADMIN}
+                for emp in employees:
+                    user_check = await db.execute(select(User).where(User.email == emp.email))
+                    if not user_check.scalar_one_or_none():
+                        role = role_map.get(emp.role.lower(), UserRole.DESIGNER)
+                        new_user = User(
+                            id=_uuid.uuid4(), email=emp.email, phone=emp.phone,
+                            password_hash=bcrypt.hash("firstfront123"), role=role,
+                            name=emp.name, is_verified=True, is_active=True,
+                        )
+                        db.add(new_user)
+                        print(f"Created login for employee: {emp.email}")
+                await db.commit()
     except Exception as e:
         print(f"Auto-seed skipped: {e}")
 
