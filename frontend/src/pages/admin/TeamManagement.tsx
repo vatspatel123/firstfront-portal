@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Users, Clock, MoreVertical, TrendingUp, Plus, X } from 'lucide-react'
-import api from '../../services/api'
 import API from '../../utils/api'
 import toast from 'react-hot-toast'
 

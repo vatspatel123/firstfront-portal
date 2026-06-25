@@ -29,33 +29,6 @@ async def list_leads(status: str = None, db: AsyncSession = Depends(get_db), use
     result = await db.execute(query)
     return result.scalars().all()
 
-@router.get("/{lead_id}", response_model=LeadResponse)
-async def get_lead(lead_id: UUID, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
-    result = await db.execute(select(Lead).where(Lead.id == lead_id))
-    lead = result.scalar_one_or_none()
-    if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    return lead
-
-@router.patch("/{lead_id}/status")
-async def update_lead_status(lead_id: UUID, req: LeadStatusUpdate, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
-    result = await db.execute(select(Lead).where(Lead.id == lead_id))
-    lead = result.scalar_one_or_none()
-    if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    lead.status = LeadStatus(req.status)
-    if req.assigned_to:
-        lead.assigned_to = req.assigned_to
-    await db.commit()
-    return {"message": "Lead status updated"}
-
-@router.get("/{lead_id}/followups", response_model=List[FollowUpResponse])
-async def list_lead_followups(lead_id: UUID, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
-    result = await db.execute(
-        select(FollowUp).where(FollowUp.lead_id == lead_id).order_by(FollowUp.created_at.desc())
-    )
-    return result.scalars().all()
-
 @router.post("/followups", response_model=FollowUpResponse)
 async def create_followup(req: FollowUpCreate, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
     followup = FollowUp(**req.dict(), created_by=user.id)
@@ -90,3 +63,30 @@ async def create_activity(req: SalesActivityCreate, db: AsyncSession = Depends(g
     await db.commit()
     await db.refresh(activity)
     return activity
+
+@router.get("/{lead_id}", response_model=LeadResponse)
+async def get_lead(lead_id: UUID, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return lead
+
+@router.patch("/{lead_id}/status")
+async def update_lead_status(lead_id: UUID, req: LeadStatusUpdate, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    lead.status = LeadStatus(req.status)
+    if req.assigned_to:
+        lead.assigned_to = req.assigned_to
+    await db.commit()
+    return {"message": "Lead status updated"}
+
+@router.get("/{lead_id}/followups", response_model=List[FollowUpResponse])
+async def list_lead_followups(lead_id: UUID, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    result = await db.execute(
+        select(FollowUp).where(FollowUp.lead_id == lead_id).order_by(FollowUp.created_at.desc())
+    )
+    return result.scalars().all()
