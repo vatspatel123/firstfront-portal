@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
-        solar: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a' },
+        solar: { 50: '#fffbeb', 100: '#fef3c7', 400: '#facc15', 500: '#f59e0b', 600: '#d97706' },
         brand: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
         sun: { 400: '#facc15', 500: '#eab308' },
         success: { DEFAULT: '#22c55e', bg: '#f0fdf4' },
