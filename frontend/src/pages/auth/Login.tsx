@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -9,17 +9,19 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuthStore()
-  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
       await login(email, password)
-      toast.success('Logged in successfully')
+      const { fetchMe } = useAuthStore.getState()
+      await fetchMe()
       const user = useAuthStore.getState().user
       const roleMap: Record<string, string> = { admin: '/admin', sales: '/sales', designer: '/designer', client: '/portal' }
-      navigate(roleMap[user?.role ?? ''] || '/portal')
+      const dest = roleMap[user?.role ?? ''] || '/portal'
+      toast.success('Logged in successfully')
+      window.location.href = dest
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Login failed')
     } finally {
