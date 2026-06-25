@@ -13,6 +13,7 @@ class EmployeeCreate(BaseModel):
     join_date: str
     salary: str
     avatar: str = ""
+    password: str = ""
 
 
 class EmployeeResponse(BaseModel):

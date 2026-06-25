@@ -25,7 +25,7 @@ export default function EmployeeDirectory() {
   const [showAdd, setShowAdd] = useState(false)
   const { employees: EMPLOYEES, loading, fetchEmployees } = useEmployeeStore()
   const [form, setForm] = useState({
-    name: '', role: '', department: 'design', email: '', phone: '', join_date: '', salary: ''
+    name: '', role: '', department: 'design', email: '', phone: '', join_date: '', salary: '', password: 'firstfront123'
   })
   const [submitting, setSubmitting] = useState(false)
 
@@ -55,7 +55,7 @@ export default function EmployeeDirectory() {
       await api.post('/api/employees/', form)
       toast.success('Employee added successfully')
       setShowAdd(false)
-      setForm({ name: '', role: '', department: 'design', email: '', phone: '', join_date: '', salary: '' })
+      setForm({ name: '', role: '', department: 'design', email: '', phone: '', join_date: '', salary: '', password: 'firstfront123' })
       fetchEmployees()
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to add employee')
@@ -177,6 +177,11 @@ export default function EmployeeDirectory() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Salary</label>
                 <input type="text" value={form.salary} onChange={e => setForm({...form, salary: e.target.value})} placeholder="Annual salary" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Login Password</label>
+                <input type="text" value={form.password} onChange={e => setForm({...form, password: e.target.value})} placeholder="Password for login" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                <p className="text-xs text-gray-400 mt-1">Default: firstfront123</p>
               </div>
               <div className="flex justify-end gap-2 mt-5 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>

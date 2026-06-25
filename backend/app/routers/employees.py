@@ -3,9 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
 from typing import List
+from passlib.hash import bcrypt
 from app.database import get_db
 from app.models.employee import Employee, LeaveRequest, LeaveStatus, PerformanceReview, EmployeeDocument
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.employee import (
     EmployeeCreate, EmployeeResponse, LeaveCreate, LeaveResponse, LeaveUpdate,
     ReviewCreate, ReviewResponse
@@ -24,12 +25,34 @@ async def list_employees(db: AsyncSession = Depends(get_db), user=Depends(get_cu
 
 @router.post("/", response_model=EmployeeResponse)
 async def create_employee(req: EmployeeCreate, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    from datetime import datetime
     join_date = req.join_date
     if isinstance(join_date, str):
-        from datetime import datetime
         join_date = datetime.strptime(join_date, "%Y-%m-%d").date()
+
+    password = req.password or "firstfront123"
+
+    role_map = {
+        "designer": UserRole.DESIGNER,
+        "sales": UserRole.SALES,
+        "admin": UserRole.ADMIN,
+    }
+    user_role = role_map.get(req.role.lower(), UserRole.DESIGNER)
+
+    new_user = User(
+        email=req.email,
+        phone=req.phone,
+        password_hash=bcrypt.hash(password),
+        role=user_role,
+        name=req.name,
+        is_verified=True,
+        is_active=True,
+    )
+    db.add(new_user)
+    await db.flush()
+
     employee = Employee(
-        user_id=user.id,
+        user_id=new_user.id,
         name=req.name,
         role=req.role,
         department=req.department,
