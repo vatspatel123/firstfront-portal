@@ -24,6 +24,10 @@ async def list_employees(db: AsyncSession = Depends(get_db), user=Depends(get_cu
 
 @router.post("/", response_model=EmployeeResponse)
 async def create_employee(req: EmployeeCreate, db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+    join_date = req.join_date
+    if isinstance(join_date, str):
+        from datetime import datetime
+        join_date = datetime.strptime(join_date, "%Y-%m-%d").date()
     employee = Employee(
         user_id=user.id,
         name=req.name,
@@ -31,7 +35,7 @@ async def create_employee(req: EmployeeCreate, db: AsyncSession = Depends(get_db
         department=req.department,
         email=req.email,
         phone=req.phone,
-        join_date=req.join_date,
+        join_date=join_date,
         salary=req.salary,
         avatar=req.avatar[:2] if req.avatar else req.name[:2].upper()
     )
