@@ -9,7 +9,7 @@ from app.database import get_db
 from app.models.project import ProjectFile, ProjectOutput
 from app.schemas.project import ProjectFileResponse, ProjectOutputResponse
 from app.utils.auth import get_current_user
-from app.services.file_storage import save_upload, save_output, get_file_path
+from app.services.file_storage import save_upload, save_output, get_file_path, validate_upload
 
 router = APIRouter()
 
@@ -21,6 +21,7 @@ async def upload_file(
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user)
 ):
+    await validate_upload(file)
     file_url = await save_upload(str(project_id), file)
     project_file = ProjectFile(
         project_id=project_id,

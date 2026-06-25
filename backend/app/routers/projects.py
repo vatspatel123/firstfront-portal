@@ -11,7 +11,7 @@ from app.models.user import User
 from app.schemas.project import (ProjectCreate, ProjectResponse, ProjectStatusUpdate,
                                  ProjectFileResponse, ProjectOutputResponse)
 from app.utils.auth import get_current_user, get_current_client
-from app.services.file_storage import save_upload, get_file_path
+from app.services.file_storage import save_upload, get_file_path, validate_upload
 from app.models.note import Notification, AuditLog
 from fastapi.responses import FileResponse
 
@@ -219,6 +219,7 @@ async def upload_file(
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user)
 ):
+    await validate_upload(file)
     file_url = await save_upload(str(project_id), file)
     project_file = ProjectFile(
         project_id=project_id,

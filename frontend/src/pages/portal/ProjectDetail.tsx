@@ -56,9 +56,24 @@ export default function ProjectDetail() {
     }
   }
 
+  const ALLOWED_TYPES = [
+    'application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/tiff',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/csv', 'application/zip', 'text/plain',
+  ]
+  const MAX_SIZE_MB = 50
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !id) return
+    if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(pdf|jpe?g|png|webp|tiff?|xlsx?|csv|zip|txt)$/i)) {
+      toast.error(`File type not allowed: ${file.type || file.name.split('.').pop()}`)
+      return
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      toast.error(`File exceeds ${MAX_SIZE_MB}MB limit`)
+      return
+    }
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)
@@ -79,7 +94,7 @@ export default function ProjectDetail() {
 
   const downloadFile = async (fileId: string, name: string, isOutput = false) => {
     try {
-      const url = isOutput ? `/api/projects/download-output/${fileId}` : `/api/projects/download/${fileId}`
+      const url = isOutput ? `/api/files/download-output/${fileId}` : `/api/files/download/${fileId}`
       const response = await API.get(url, { responseType: 'blob' })
       const blobUrl = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')

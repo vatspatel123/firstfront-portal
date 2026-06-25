@@ -1,7 +1,7 @@
 import os
 import shutil
 from pathlib import Path
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from app.config import get_settings
 
@@ -9,6 +9,27 @@ settings = get_settings()
 
 UPLOAD_DIR = Path("uploads")
 OUTPUT_DIR = Path("outputs")
+
+ALLOWED_UPLOAD_TYPES = {
+    "application/pdf", "image/jpeg", "image/png", "image/webp", "image/tiff",
+    "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "text/csv", "application/zip", "application/x-zip-compressed",
+    "application/dwg", "application/dxf",
+    "text/plain", "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+MAX_UPLOAD_SIZE_MB = 50
+
+
+async def validate_upload(file: UploadFile):
+    if file.content_type and file.content_type not in ALLOWED_UPLOAD_TYPES:
+        ext = file.filename.rsplit(".", 1)[-1].lower() if file.filename and "." in file.filename else ""
+        if ext not in {"pdf", "jpg", "jpeg", "png", "webp", "tiff", "tif", "xlsx", "xls", "csv", "zip", "dwg", "dxf", "txt", "doc", "docx"}:
+            raise HTTPException(status_code=400, detail=f"File type '{file.content_type}' is not allowed.")
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=400, detail=f"File exceeds {MAX_UPLOAD_SIZE_MB}MB limit.")
+    await file.seek(0)
 
 for d in [UPLOAD_DIR, OUTPUT_DIR]:
     d.mkdir(exist_ok=True)

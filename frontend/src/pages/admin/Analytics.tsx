@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { TrendingUp, TrendingDown, Calendar, Briefcase, Users } from 'lucide-react'
-import api from '../../services/api'
+import API from '../../utils/api'
 
 export default function Analytics() {
   const [stats, setStats] = useState({
@@ -15,8 +15,8 @@ export default function Analytics() {
     const fetchData = async () => {
       try {
         const [projectsRes, leadsRes] = await Promise.all([
-          api.get('/api/projects/'),
-          api.get('/api/leads/')
+          API.get('/api/projects/'),
+          API.get('/api/leads/')
         ])
         const projects = projectsRes.data
         setStats({

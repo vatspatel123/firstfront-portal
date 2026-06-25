@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, Plus, Mail, Phone, Calendar, MoreVertical, X, CheckCircle, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useEmployeeStore } from '../../store/useApiStores'
-import api from '../../services/api'
+import API from '../../utils/api'
 
 const departments = ['All', 'design', 'operations', 'sales', 'quality', 'finance', 'hr']
 const departmentLabels: Record<string, string> = {
@@ -56,7 +56,7 @@ export default function EmployeeDirectory() {
     e.preventDefault()
     setSubmitting(true)
     try {
-      await api.post('/api/employees/', {
+      await API.post('/api/employees/', {
         ...form,
         role: form.system_role,
       })

@@ -104,12 +104,31 @@ async def seed():
             ("Kavita Nair", "Godrej Properties", "7777777777", "kavita@godrej.com", "New housing project solar", LeadStatus.NEW),
             ("Arun Mehra", "Welspun Energy", "7777777778", "arun@welspun.com", "O&M contract renewal", LeadStatus.LOST),
         ]
+        lead_ids = []
         for name, company, phone, email, req, status in leads_data:
             lead = Lead(
                 name=name, company=company, phone=phone, email=email,
                 requirement=req, status=status, lead_score=50
             )
             db.add(lead)
+            await db.flush()
+            lead_ids.append(lead.id)
+
+        # Follow-ups for leads
+        followups_data = [
+            (lead_ids[1], "Follow up on site visit for 300kW ground mount", datetime.utcnow() + timedelta(days=2), "pending", sales_user.id),
+            (lead_ids[2], "Send updated proposal with revised pricing", datetime.utcnow() + timedelta(days=3), "pending", sales_user.id),
+            (lead_ids[3], "Schedule call to discuss partnership terms", datetime.utcnow() + timedelta(days=1), "completed", sales_user.id),
+            (lead_ids[4], "Confirm meeting time for Infosys campus visit", datetime.utcnow() + timedelta(days=5), "pending", sales_user.id),
+            (lead_ids[5], "Send quotation for manufacturing partnership", datetime.utcnow() + timedelta(days=4), "pending", admin.id),
+        ]
+        for lead_id, note, next_date, fb_status, created_by in followups_data:
+            followup = FollowUp(
+                lead_id=lead_id, note=note,
+                next_followup_date=next_date,
+                status=fb_status, created_by=created_by
+            )
+            db.add(followup)
 
         # Notifications for admin
         for msg in [

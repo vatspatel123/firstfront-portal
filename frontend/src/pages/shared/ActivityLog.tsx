@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Activity, Upload, MessageCircle, Sun, Camera, CheckCircle, Download } from 'lucide-react'
-import api from '../../services/api'
+import API from '../../utils/api'
 
 interface ActivityItem {
   id: string
@@ -38,7 +38,7 @@ export default function ActivityLog() {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const res = await api.get('/api/leads/activities')
+        const res = await API.get('/api/leads/activities')
         const items = res.data.map((a: any) => ({
           id: a.id,
           type: 'message',
