@@ -100,68 +100,68 @@ export default function ProjectDetail() {
     }
   }
 
-  if (!project) return <div className="text-center py-10">Loading...</div>
+  if (!project) return <div className="text-center py-10 text-slate-500">Loading...</div>
 
-  const status = STATUS_FLOW[project.status] || { label: project.status, color: 'bg-gray-100 text-gray-600' }
+  const status = STATUS_FLOW[project.status] || { label: project.status, color: 'bg-slate-100 text-slate-600' }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <button onClick={() => navigate(-1)} className="btn-ghost flex items-center gap-2 -ml-2 inline-flex">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 -ml-2 inline-flex transition-all">
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-semibold text-ink">{project.name}</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">{project.name}</h1>
           </div>
-          <p className="text-gray-500">{project.services_required} · {project.location} · {project.capacity} kW</p>
+          <p className="text-sm text-slate-500">{project.services_required} · {project.location} · {project.capacity} kW</p>
         </div>
-        <span className={`status-pill ${status.color} text-sm !px-3 !py-1.5`}>{status.label}</span>
+        <span className={`rounded-full px-3 py-1 text-xs font-medium ${status.color}`}>{status.label}</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card p-5">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="font-display font-semibold text-ink">Uploaded Files</h2>
-            <label className="btn-secondary text-xs px-3 py-1.5 cursor-pointer">
+            <h2 className="font-semibold text-slate-900">Uploaded Files</h2>
+            <label className="border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-all text-xs px-3 py-1.5 cursor-pointer font-medium">
               {uploading ? 'Uploading...' : 'Upload File'}
               <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
             </label>
           </div>
           {files.length === 0 ? (
-            <p className="text-sm text-gray-400">No files uploaded yet.</p>
+            <p className="text-sm text-slate-400">No files uploaded yet.</p>
           ) : (
             <div className="space-y-2">
               {files.map((f) => (
-                <div key={f.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                <div key={f.id} className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-ink">{f.original_name}</span>
+                    <FileText className="h-4 w-4 text-slate-400" />
+                    <span className="text-sm text-slate-900">{f.original_name}</span>
                   </div>
-                  <Download onClick={() => downloadFile(f.id, f.original_name)} className="h-4 w-4 text-gray-400 hover:text-brand-500 cursor-pointer transition-colors" />
+                  <Download onClick={() => downloadFile(f.id, f.original_name)} className="h-4 w-4 text-slate-400 hover:text-blue-500 cursor-pointer transition-colors" />
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="card p-5">
-          <h2 className="font-display font-semibold text-ink mb-4">Project Outputs</h2>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <h2 className="font-semibold text-slate-900 mb-4">Project Outputs</h2>
           {outputs.length === 0 ? (
             <div className="text-center py-6">
-              <Clock className="h-8 w-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">No outputs yet. Check back once design is in progress.</p>
+              <Clock className="h-8 w-8 text-slate-200 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">No outputs yet. Check back once design is in progress.</p>
             </div>
           ) : (
             <div className="space-y-2">
               {outputs.map((o) => (
-                <div key={o.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                <div key={o.id} className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-ink">{o.original_name}</span>
+                    <FileText className="h-4 w-4 text-slate-400" />
+                    <span className="text-sm text-slate-900">{o.original_name}</span>
                   </div>
-                  <Download onClick={() => downloadFile(o.id, o.original_name, true)} className="h-4 w-4 text-gray-400 hover:text-brand-500 cursor-pointer transition-colors" />
+                  <Download onClick={() => downloadFile(o.id, o.original_name, true)} className="h-4 w-4 text-slate-400 hover:text-blue-500 cursor-pointer transition-colors" />
                 </div>
               ))}
             </div>
@@ -169,16 +169,16 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <div className="card p-5">
-        <h2 className="font-display font-semibold text-ink mb-3">Quick Message</h2>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <h2 className="font-semibold text-slate-900 mb-3">Quick Message</h2>
         <div className="space-y-3 mb-4 max-h-48 overflow-y-auto">
           {messages.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-2">No messages yet.</p>
+            <p className="text-sm text-slate-400 text-center py-2">No messages yet.</p>
           ) : (
             messages.map((m) => (
-              <div key={m.id} className="text-sm bg-gray-50 p-3 rounded-lg">
-                <p className="font-medium text-ink text-xs mb-1">{m.sender_name}</p>
-                <p className="text-gray-700">{m.text}</p>
+              <div key={m.id} className="text-sm bg-slate-50 p-3 rounded-xl">
+                <p className="font-medium text-slate-900 text-xs mb-1">{m.sender_name}</p>
+                <p className="text-slate-700">{m.text}</p>
               </div>
             ))
           )}
@@ -186,9 +186,9 @@ export default function ProjectDetail() {
         <div className="flex gap-2">
           <input type="text" value={message} onChange={e => setMessage(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Type a message..." className="input-field flex-1" />
+            placeholder="Type a message..." className="flex-1 rounded-xl border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 px-4 py-2.5" />
           <button disabled={!message.trim()} onClick={handleSendMessage}
-            className="btn-primary flex items-center gap-2 !px-4">
+            className="bg-blue-600 text-white rounded-xl px-4 py-2.5 hover:bg-blue-700 transition-all duration-200 font-medium flex items-center gap-2">
             <Send className="h-4 w-4" />
           </button>
         </div>

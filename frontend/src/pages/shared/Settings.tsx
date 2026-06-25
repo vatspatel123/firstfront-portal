@@ -86,15 +86,15 @@ export default function Settings() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1">Manage your account and preferences</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
+        <p className="text-sm text-slate-500 mt-1">Manage your account and preferences</p>
       </div>
 
-      <div className="flex gap-1 border-b border-gray-100 overflow-x-auto">
+      <div className="flex gap-1 border-b border-slate-100 overflow-x-auto">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-              tab === t.id ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              tab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}>
             <t.icon className="h-4 w-4" />
             {t.label}
@@ -104,107 +104,107 @@ export default function Settings() {
 
       {tab === 'profile' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border p-6">
-            <h2 className="font-semibold text-gray-900 mb-1">Profile Picture</h2>
-            <p className="text-sm text-gray-500 mb-4">Your avatar appears across the platform</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h2 className="font-semibold text-slate-900 mb-1">Profile Picture</h2>
+            <p className="text-sm text-slate-500 mb-4">Your avatar appears across the platform</p>
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary-600 text-white text-lg font-bold flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-blue-600 text-white text-lg font-bold flex items-center justify-center">
                 {avatarInitials}
               </div>
               <div className="flex gap-2">
-                <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm">Upload New</button>
-                <button className="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Remove</button>
+                <button className="border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-all text-sm">Upload New</button>
+                <button className="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm">Remove</button>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border p-6">
-            <h2 className="font-semibold text-gray-900 mb-1">Personal Information</h2>
-            <p className="text-sm text-gray-500 mb-4">Update your personal details</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h2 className="font-semibold text-slate-900 mb-1">Personal Information</h2>
+            <p className="text-sm text-slate-500 mb-4">Update your personal details</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Company</label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input type="text" value={company} onChange={e => setCompany(e.target.value)} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="text" value={company} onChange={e => setCompany(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
                 </div>
               </div>
             </div>
             <div className="flex justify-end mt-6">
-              <button onClick={handleSaveProfile} className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center gap-2"><Save className="h-4 w-4" /> Save Changes</button>
+              <button onClick={handleSaveProfile} className="bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium flex items-center gap-2"><Save className="h-4 w-4" /> Save Changes</button>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border p-6">
-            <h2 className="font-semibold text-gray-900 mb-1">Account Role</h2>
-            <p className="text-sm text-gray-500 mb-3">Your current role on the platform</p>
-            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-primary-100 text-primary-700 capitalize">{user?.role}</span>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h2 className="font-semibold text-slate-900 mb-1">Account Role</h2>
+            <p className="text-sm text-slate-500 mb-3">Your current role on the platform</p>
+            <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 capitalize">{user?.role}</span>
           </div>
         </div>
       )}
 
       {tab === 'security' && (
-        <div className="bg-white rounded-xl border p-6 space-y-4 max-w-xl">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 max-w-xl">
           <div>
-            <h2 className="font-semibold text-gray-900 mb-1">Change Password</h2>
-            <p className="text-sm text-gray-500 mb-4">Update your password to keep your account secure</p>
+            <h2 className="font-semibold text-slate-900 mb-1">Change Password</h2>
+            <p className="text-sm text-slate-500 mb-4">Update your password to keep your account secure</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+            <label className="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
+            <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+            <label className="block text-sm font-medium text-slate-700 mb-2">New Password</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
+            <label className="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
+            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
           </div>
           <div className="flex justify-end pt-2">
-            <button onClick={handleSaveSecurity} className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">Update Password</button>
+            <button onClick={handleSaveSecurity} className="bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium">Update Password</button>
           </div>
         </div>
       )}
 
       {tab === 'notifications' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border p-6">
-            <h2 className="font-semibold text-gray-900 mb-1">Notification Channels</h2>
-            <p className="text-sm text-gray-500 mb-4">Choose how you want to be notified</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h2 className="font-semibold text-slate-900 mb-1">Notification Channels</h2>
+            <p className="text-sm text-slate-500 mb-4">Choose how you want to be notified</p>
             <div className="space-y-3">
               {notifItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div key={item.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{item.emoji}</span>
                     <div>
-                      <p className="font-medium text-gray-900 text-sm">{item.title}</p>
-                      <p className="text-xs text-gray-500">{item.desc}</p>
+                      <p className="font-medium text-slate-900 text-sm">{item.title}</p>
+                      <p className="text-xs text-slate-500">{item.desc}</p>
                     </div>
                   </div>
                   <button onClick={() => item.set(!item.on)}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${item.on ? 'bg-primary-500' : 'bg-gray-200'}`}>
+                    className={`relative w-11 h-6 rounded-full transition-colors ${item.on ? 'bg-blue-600' : 'bg-slate-200'}`}>
                     <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${item.on ? 'translate-x-5' : ''}`} />
                   </button>
                 </div>

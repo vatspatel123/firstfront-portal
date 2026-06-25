@@ -34,17 +34,17 @@ export default function CrmDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">CRM Dashboard</h1>
+      <h1 className="text-2xl font-semibold text-slate-900 mb-6">CRM Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map(card => (
-          <div key={card.label} className="bg-white rounded-xl border p-6">
+          <div key={card.label} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-lg ${card.bg}`}>
+              <div className={`p-3 rounded-xl ${card.bg}`}>
                 <card.icon className={`h-6 w-6 ${card.color}`} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">{card.label}</p>
-                <p className="text-2xl font-bold">{card.value}</p>
+                <p className="text-sm text-slate-500">{card.label}</p>
+                <p className="text-2xl font-semibold text-slate-900">{card.value}</p>
               </div>
             </div>
           </div>

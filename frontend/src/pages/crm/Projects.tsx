@@ -32,49 +32,49 @@ export default function CrmProjects() {
       design_in_progress: 'bg-primary-50 text-primary-600',
       qa_review: 'bg-indigo-50 text-indigo-600',
       approved: 'bg-green-50 text-green-600',
-      delivered: 'bg-gray-100 text-gray-600',
+      delivered: 'bg-slate-100 text-slate-600',
     }
-    return colors[status] || 'bg-gray-100 text-gray-600'
+    return colors[status] || 'bg-slate-100 text-slate-600'
   }
 
   if (loading) {
     return (
       <div className="flex justify-center p-8">
-        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
       </div>
     )
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">{isDesigner ? 'My Projects' : 'All Projects'}</h1>
-      <div className="bg-white rounded-xl border">
-        <div className="divide-y">
+      <h1 className="text-2xl font-semibold text-slate-900 mb-6">{isDesigner ? 'My Projects' : 'All Projects'}</h1>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="divide-y divide-slate-100">
           {projects.length === 0 ? (
-            <p className="p-8 text-center text-gray-500">No projects yet</p>
+            <p className="p-8 text-center text-slate-500">No projects yet</p>
           ) : (
             projects.map((project: any) => {
               const linkTo = isDesigner
                 ? `/designer/workspace`
                 : `/portal/projects/${project.id}`
               return (
-                <Link key={project.id} to={linkTo} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                <Link key={project.id} to={linkTo} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-all">
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{project.name}</p>
-                    <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                    <p className="font-medium text-slate-900">{project.name}</p>
+                    <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
                       <span>{project.location}</span>
                       {project.client_name && <span>· {project.client_name}</span>}
                       {project.capacity && <span>· {project.capacity}kW</span>}
                     </div>
                     {project.deadline && (
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-slate-400 mt-1">
                         Deadline: {new Date(project.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     )}
                   </div>
                   <div className="flex items-center gap-3">
                     {project.designer_name && (
-                      <span className="text-xs bg-primary-50 text-primary-700 px-2 py-1 rounded-full hidden sm:inline">
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full hidden sm:inline">
                         {project.designer_name}
                       </span>
                     )}

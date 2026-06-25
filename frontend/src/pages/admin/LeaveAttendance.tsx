@@ -17,7 +17,7 @@ export default function LeaveAttendance() {
 
   if (loading) return (
     <div className="flex justify-center p-8">
-      <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+      <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
     </div>
   )
 
@@ -48,31 +48,31 @@ export default function LeaveAttendance() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Leave & Attendance</h1>
-        <p className="text-gray-500 mt-1">Manage time-off requests and view team attendance</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Leave & Attendance</h1>
+        <p className="text-sm text-slate-500 mt-1">Manage time-off requests and view team attendance</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border p-5">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 p-6">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-sm text-gray-500">Pending</p>
+            <p className="text-sm text-slate-500">Pending</p>
             <Clock className="h-4 w-4 text-amber-500" />
           </div>
           <p className="text-2xl font-bold text-amber-600">{counts.pending}</p>
         </div>
-        <div className="bg-white rounded-xl border p-5">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 p-6">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-sm text-gray-500">Approved (this month)</p>
+            <p className="text-sm text-slate-500">Approved (this month)</p>
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           </div>
           <p className="text-2xl font-bold text-green-600">{counts.approved}</p>
         </div>
-        <div className="bg-white rounded-xl border p-5">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 p-6">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-sm text-gray-500">On Leave Today</p>
-            <CalendarIcon className="h-4 w-4 text-primary-500" />
+            <p className="text-sm text-slate-500">On Leave Today</p>
+            <CalendarIcon className="h-4 w-4 text-blue-500" />
           </div>
-          <p className="text-2xl font-bold text-primary-600">
+          <p className="text-2xl font-bold text-blue-600">
             {requests.filter(r => {
               const from = new Date(r.from_date)
               const to = new Date(r.to_date)
@@ -82,8 +82,8 @@ export default function LeaveAttendance() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border p-5">
-        <h2 className="font-semibold text-gray-900 mb-3">This Week</h2>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+        <h2 className="font-semibold text-slate-900 mb-3">This Week</h2>
         <div className="grid grid-cols-7 gap-2">
           {weekDates.map((d, i) => {
             const isToday = d.toDateString() === today.toDateString()
@@ -94,13 +94,13 @@ export default function LeaveAttendance() {
               return d >= from && d <= to && r.status === 'approved'
             }).length
             return (
-              <div key={i} className={`rounded-lg p-2 text-center ${isToday ? 'bg-primary-50 border border-primary-200' : 'bg-gray-50'}`}>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">{dayName}</p>
-                <p className={`text-lg font-semibold ${isToday ? 'text-primary-600' : 'text-gray-900'}`}>{d.getDate()}</p>
+              <div key={i} className={`rounded-xl p-2 text-center ${isToday ? 'bg-blue-50 border border-blue-200' : 'bg-slate-50'} transition-colors`}>
+                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">{dayName}</p>
+                <p className={`text-lg font-semibold ${isToday ? 'text-blue-600' : 'text-slate-900'}`}>{d.getDate()}</p>
                 {onLeaveCount > 0 ? (
                   <p className="text-[10px] text-amber-600 mt-1">{onLeaveCount} on leave</p>
                 ) : (
-                  <p className="text-[10px] text-gray-300 mt-1">—</p>
+                  <p className="text-[10px] text-slate-300 mt-1">—</p>
                 )}
               </div>
             )
@@ -109,11 +109,11 @@ export default function LeaveAttendance() {
       </div>
 
       <div>
-        <div className="flex gap-1 border-b border-gray-100 mb-3">
+        <div className="flex gap-1 border-b border-slate-100 mb-3">
           {(['all', 'pending', 'approved', 'rejected'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors capitalize ${
-                tab === t ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                tab === t ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}>
               {t} {t !== 'all' && `(${counts[t]})`}
             </button>
@@ -122,23 +122,23 @@ export default function LeaveAttendance() {
 
         <div className="space-y-2">
           {filtered.length === 0 ? (
-            <div className="bg-white rounded-xl border p-12 text-center text-gray-400">No {tab} requests.</div>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center text-slate-400">No {tab} requests.</div>
           ) : (
             filtered.map(r => {
               const s = statusStyles[r.status] || statusStyles.pending
               return (
-                <div key={r.id} className="bg-white rounded-xl border p-4">
+                <div key={r.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 p-4">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
                       {r.employee_name?.split(' ').map(n => n[0]).join('') || '?'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-gray-900 text-sm">{r.employee_name}</p>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.bg} ${s.text}`}>{r.status}</span>
+                        <p className="font-medium text-slate-900 text-sm">{r.employee_name}</p>
+                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${s.bg} ${s.text}`}>{r.status}</span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">{r.type} · {r.from_date?.slice(0,10)} → {r.to_date?.slice(0,10)} · {r.days} day(s)</p>
-                      <p className="text-xs text-gray-400 mt-1 italic">"{r.reason}"</p>
+                      <p className="text-sm text-slate-500 mt-1">{r.type} · {r.from_date?.slice(0,10)} → {r.to_date?.slice(0,10)} · {r.days} day(s)</p>
+                      <p className="text-xs text-slate-400 mt-1 italic">"{r.reason}"</p>
                     </div>
                     {r.status === 'pending' && (
                       <div className="flex gap-2 shrink-0">

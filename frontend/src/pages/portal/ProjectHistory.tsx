@@ -19,27 +19,27 @@ export default function ProjectHistory() {
   }, [])
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Project History</h1>
-      <div className="bg-white rounded-xl border">
+    <div className="min-h-screen bg-slate-50">
+      <h1 className="text-2xl font-semibold text-slate-900 mb-6">Project History</h1>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
         {projects.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <History className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+          <div className="p-8 text-center text-slate-500">
+            <History className="h-12 w-12 mx-auto mb-3 text-slate-300" />
             <p>No completed projects yet</p>
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y divide-slate-100">
             {projects.map((project: any) => (
               <Link
                 key={project.id}
                 to={`/portal/projects/${project.id}`}
-                className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between p-4 hover:bg-slate-50 transition-all duration-200"
               >
                 <div>
-                  <p className="font-medium">{project.name}</p>
-                  <p className="text-sm text-gray-500">{project.location}</p>
+                  <p className="font-medium text-slate-900">{project.name}</p>
+                  <p className="text-sm text-slate-500">{project.location}</p>
                 </div>
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-solar-100 text-solar-600 capitalize">
+                <span className="rounded-full px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 capitalize">
                   Delivered
                 </span>
               </Link>

@@ -14,10 +14,10 @@ interface Lead {
 }
 
 const TYPE_META: Record<string, { icon: typeof PhoneCall; label: string; color: string; bg: string }> = {
-  call:    { icon: PhoneCall, label: 'Call', color: 'text-primary-600', bg: 'bg-primary-50' },
+  call:    { icon: PhoneCall, label: 'Call', color: 'text-blue-600', bg: 'bg-blue-50' },
   meeting: { icon: Video, label: 'Meeting', color: 'text-purple-600', bg: 'bg-purple-50' },
   email:   { icon: Mail, label: 'Email', color: 'text-amber-600', bg: 'bg-amber-50' },
-  note:    { icon: FileText, label: 'Note', color: 'text-gray-500', bg: 'bg-gray-100' },
+  note:    { icon: FileText, label: 'Note', color: 'text-slate-500', bg: 'bg-slate-100' },
 }
 
 function detectType(notes: string): string {
@@ -93,13 +93,13 @@ export default function SalesActivityLog() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sales Activity</h1>
-          <p className="text-gray-500 mt-1 flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-slate-900">Sales Activity</h1>
+          <p className="text-slate-500 mt-1 flex items-center gap-2">
             <Calendar className="h-4 w-4" /> {today}
           </p>
         </div>
         <button onClick={() => setShowLogActivity(true)}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center gap-2">
+          className="bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium flex items-center gap-2">
           <Plus className="h-4 w-4" /> Log Activity
         </button>
       </div>
@@ -109,13 +109,13 @@ export default function SalesActivityLog() {
         {Object.entries(TYPE_META).map(([key, meta]) => {
           const count = enriched.filter(a => a.type === key).length
           return (
-            <div key={key} className="bg-white rounded-xl border p-4 cursor-pointer hover:shadow-md transition-all"
+            <div key={key} className="bg-white rounded-2xl border border-slate-200 p-4 cursor-pointer hover:shadow-md transition-all duration-200 shadow-sm"
               onClick={() => setSelectedType(selectedType === key ? 'all' : key)}>
               <div className={`w-9 h-9 rounded-lg ${meta.bg} ${meta.color} flex items-center justify-center mb-2`}>
                 <meta.icon className="h-4 w-4" />
               </div>
-              <p className="text-xl font-bold text-gray-900">{count}</p>
-              <p className="text-xs text-gray-500">{meta.label}s</p>
+              <p className="text-xl font-semibold text-slate-900">{count}</p>
+              <p className="text-xs text-slate-500">{meta.label}s</p>
             </div>
           )
         })}
@@ -124,12 +124,12 @@ export default function SalesActivityLog() {
       {/* Filter */}
       <div className="flex gap-1.5">
         <button onClick={() => setSelectedType('all')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${selectedType === 'all' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${selectedType === 'all' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
           All
         </button>
         {Object.entries(TYPE_META).map(([key, meta]) => (
           <button key={key} onClick={() => setSelectedType(key)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${selectedType === key ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${selectedType === key ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
             {meta.label}s
           </button>
         ))}
@@ -138,12 +138,12 @@ export default function SalesActivityLog() {
       {/* Activity List */}
       <div className="space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-xl border p-12 text-center">
-            <FileText className="h-12 w-12 text-gray-200 mx-auto mb-3" />
-            <h3 className="font-medium text-gray-900">No activities yet</h3>
-            <p className="text-sm text-gray-500 mt-1">Start logging your sales activities</p>
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm hover:shadow-md transition-all duration-200">
+            <FileText className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+            <h3 className="font-medium text-slate-900">No activities yet</h3>
+            <p className="text-sm text-slate-500 mt-1">Start logging your sales activities</p>
             <button onClick={() => setShowLogActivity(true)}
-              className="mt-4 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 text-sm">
+              className="mt-4 bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium text-sm">
               Log Your First Activity
             </button>
           </div>
@@ -151,7 +151,7 @@ export default function SalesActivityLog() {
           filtered.map((activity) => {
             const meta = TYPE_META[activity.type] || TYPE_META.note
             return (
-              <div key={activity.id} className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
+              <div key={activity.id} className="bg-white rounded-2xl border border-slate-200 p-4 hover:shadow-md transition-all duration-200 shadow-sm">
                 <div className="flex items-start gap-4">
                   <div className={`w-10 h-10 rounded-xl ${meta.bg} ${meta.color} flex items-center justify-center shrink-0`}>
                     <meta.icon className="h-5 w-5" />
@@ -159,20 +159,20 @@ export default function SalesActivityLog() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-900">{activity.lead_name}</p>
+                        <p className="text-sm font-semibold text-slate-900">{activity.lead_name}</p>
                         {activity.lead_company && (
                           <>
-                            <span className="text-xs text-gray-400">·</span>
-                            <p className="text-xs text-gray-500">{activity.lead_company}</p>
+                            <span className="text-xs text-slate-400">·</span>
+                            <p className="text-xs text-slate-500">{activity.lead_company}</p>
                           </>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-400">
                         <Clock className="h-3 w-3" />
                         {activity.date ? new Date(activity.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 leading-relaxed">{activity.discussion_notes}</p>
+                    <p className="text-sm text-slate-600 leading-relaxed">{activity.discussion_notes}</p>
                     {activity.next_action && (
                       <div className="mt-2 px-3 py-1.5 bg-amber-50 rounded-lg inline-block">
                         <p className="text-xs text-amber-700 font-medium">Next: {activity.next_action}</p>
@@ -191,16 +191,16 @@ export default function SalesActivityLog() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowLogActivity(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Log Activity</h2>
-              <button onClick={() => setShowLogActivity(false)} className="text-gray-400 hover:text-gray-600">
+              <h2 className="text-lg font-semibold text-slate-900">Log Activity</h2>
+              <button onClick={() => setShowLogActivity(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Related Lead</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Related Lead</label>
                 <select value={form.lead_id} onChange={e => setForm(f => ({ ...f, lead_id: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                   <option value="">General (no specific lead)</option>
                   {leads.map(l => (
                     <option key={l.id} value={l.id}>{l.name} — {l.company}</option>
@@ -208,25 +208,25 @@ export default function SalesActivityLog() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Discussion Notes *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Discussion Notes *</label>
                 <textarea value={form.discussion_notes} onChange={e => setForm(f => ({ ...f, discussion_notes: e.target.value }))}
                   placeholder="What was discussed? (e.g. Called client, discussed rooftop feasibility...)"
-                  rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none" />
+                  rows={4} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Next Action</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Next Action</label>
                 <input type="text" value={form.next_action} onChange={e => setForm(f => ({ ...f, next_action: e.target.value }))}
                   placeholder="Follow-up plan..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowLogActivity(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-all">
                 Cancel
               </button>
               <button onClick={handleLogActivity} disabled={saving}
-                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 font-medium">
                 {saving ? 'Saving...' : 'Log Activity'}
               </button>
             </div>

@@ -121,7 +121,7 @@ export default function ProjectWorkspace() {
   if (loading) {
     return (
       <div className="flex justify-center p-8">
-        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
       </div>
     )
   }
@@ -129,13 +129,13 @@ export default function ProjectWorkspace() {
   if (!activeProject) return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink">Project Workspace</h1>
-        <p className="text-gray-500 mt-1">Select a project to start working</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Project Workspace</h1>
+        <p className="text-sm text-slate-500 mt-1">Select a project to start working</p>
       </div>
-      <div className="card p-12 text-center">
-        <FolderOpen className="h-12 w-12 text-gray-200 mx-auto mb-3" />
-        <h3 className="font-medium text-ink">No Assigned Projects</h3>
-        <p className="text-sm text-gray-500 mt-1">Ask admin to assign you a project first</p>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
+        <FolderOpen className="h-12 w-12 text-slate-200 mx-auto mb-3" />
+        <h3 className="font-medium text-slate-900">No Assigned Projects</h3>
+        <p className="text-sm text-slate-500 mt-1">Ask admin to assign you a project first</p>
       </div>
     </div>
   )
@@ -144,10 +144,10 @@ export default function ProjectWorkspace() {
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink">Project Workspace</h1>
-          <p className="text-gray-500 mt-1">{activeProject.name} · {activeProject.location}</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Project Workspace</h1>
+          <p className="text-sm text-slate-500 mt-1">{activeProject.name} · {activeProject.location}</p>
         </div>
-        <div className="flex items-center gap-3 text-sm text-gray-500">
+        <div className="flex items-center gap-3 text-sm text-slate-500">
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
             <span>{activeProject.client_name || 'Client'}</span>
@@ -163,17 +163,17 @@ export default function ProjectWorkspace() {
 
       {/* Project Selector */}
       {projects.length > 1 && (
-        <div className="card p-4">
-          <p className="text-sm font-medium text-ink mb-2">Switch Project</p>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+          <p className="text-sm font-medium text-slate-900 mb-2">Switch Project</p>
           <div className="flex gap-2 flex-wrap">
             {projects.filter(p => ['assigned', 'design_in_progress'].includes(p.status)).map(p => (
               <button
                 key={p.id}
                 onClick={() => setSelectedId(p.id)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   activeProject.id === p.id
-                    ? 'bg-brand-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 {p.name}
@@ -185,73 +185,73 @@ export default function ProjectWorkspace() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Checklist */}
-        <div className="card p-5">
-          <h2 className="font-display font-semibold text-ink mb-4">Design Checklist</h2>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <h2 className="font-semibold text-slate-900 mb-4">Design Checklist</h2>
           <div className="space-y-2">
             {items.map((item) => (
               <button key={item.id} onClick={() => toggleItem(item.id)}
-                className="w-full flex items-center gap-3 text-left transition-colors hover:bg-gray-50 rounded-lg p-2 -mx-2">
+                className="w-full flex items-center gap-3 text-left transition-colors hover:bg-slate-50 rounded-xl p-2 -mx-2">
                 {item.done ? (
-                  <CheckSquare className="h-5 w-5 text-success shrink-0" />
+                  <CheckSquare className="h-5 w-5 text-green-600 shrink-0" />
                 ) : (
-                  <Square className="h-5 w-5 text-gray-300 shrink-0" />
+                  <Square className="h-5 w-5 text-slate-300 shrink-0" />
                 )}
-                <span className={`text-sm ${item.done ? 'text-gray-400 line-through' : 'text-ink'}`}>{item.label}</span>
+                <span className={`text-sm ${item.done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{item.label}</span>
               </button>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="w-full bg-gray-100 rounded-full h-2">
-              <div className="bg-brand-500 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <div className="w-full bg-slate-100 rounded-full h-2">
+              <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
             </div>
-            <p className="text-xs text-gray-400 mt-1">{items.filter(i => i.done).length}/{items.length} complete</p>
+            <p className="text-xs text-slate-400 mt-1">{items.filter(i => i.done).length}/{items.length} complete</p>
           </div>
         </div>
 
         {/* Files */}
         <div className="space-y-4">
           {/* Output Files */}
-          <div className="card p-5">
-            <h2 className="font-display font-semibold text-ink mb-4">Design Outputs</h2>
-            <label className="block border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-brand-500/50 transition-colors cursor-pointer">
-              <Upload className="h-6 w-6 text-gray-300 mx-auto mb-1" />
-              <p className="text-sm text-gray-500">{uploading ? 'Uploading...' : 'Upload deliverables'}</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <h2 className="font-semibold text-slate-900 mb-4">Design Outputs</h2>
+            <label className="block border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:border-blue-400/50 transition-all duration-200 cursor-pointer">
+              <Upload className="h-6 w-6 text-slate-300 mx-auto mb-1" />
+              <p className="text-sm text-slate-500">{uploading ? 'Uploading...' : 'Upload deliverables'}</p>
               <input type="file" className="hidden" onChange={handleOutputUpload} disabled={uploading} />
             </label>
             <div className="mt-3 space-y-2">
               {outputs.map(o => (
-                <div key={o.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                <div key={o.id} className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-ink">{o.original_name}</span>
+                    <FileText className="h-4 w-4 text-slate-400" />
+                    <span className="text-sm text-slate-900">{o.original_name}</span>
                   </div>
-                  <Download onClick={() => downloadFile(o.id, o.original_name, 'output')} className="h-4 w-4 text-gray-400 hover:text-brand-500 cursor-pointer transition-colors" />
+                  <Download onClick={() => downloadFile(o.id, o.original_name, 'output')} className="h-4 w-4 text-slate-400 hover:text-blue-600 cursor-pointer transition-colors" />
                 </div>
               ))}
-              {outputs.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No outputs uploaded yet</p>}
+              {outputs.length === 0 && <p className="text-xs text-slate-400 text-center py-2">No outputs uploaded yet</p>}
             </div>
           </div>
 
           {/* Input Files */}
-          <div className="card p-5">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-semibold text-ink">Site Data</h2>
-              <label className="text-xs text-brand-600 hover:text-brand-700 cursor-pointer flex items-center gap-1">
+              <h2 className="font-semibold text-slate-900">Site Data</h2>
+              <label className="text-xs text-blue-600 hover:text-blue-700 cursor-pointer flex items-center gap-1">
                 <Upload className="h-3 w-3" /> Upload
                 <input type="file" className="hidden" onChange={handleInputUpload} disabled={uploading} />
               </label>
             </div>
             <div className="space-y-2">
               {inputs.map(f => (
-                <div key={f.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                <div key={f.id} className="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-ink">{f.original_name}</span>
+                    <FileText className="h-4 w-4 text-slate-400" />
+                    <span className="text-sm text-slate-900">{f.original_name}</span>
                   </div>
-                  <Download onClick={() => downloadFile(f.id, f.original_name, 'input')} className="h-4 w-4 text-gray-400 hover:text-brand-500 cursor-pointer transition-colors" />
+                  <Download onClick={() => downloadFile(f.id, f.original_name, 'input')} className="h-4 w-4 text-slate-400 hover:text-blue-600 cursor-pointer transition-colors" />
                 </div>
               ))}
-              {inputs.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No site data uploaded yet</p>}
+              {inputs.length === 0 && <p className="text-xs text-slate-400 text-center py-2">No site data uploaded yet</p>}
             </div>
           </div>
         </div>

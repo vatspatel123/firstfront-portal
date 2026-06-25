@@ -74,14 +74,14 @@ export default function NewProjectWizard() {
   if (showSuccess) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="card p-8 text-center max-w-md w-full">
-          <div className="w-16 h-16 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
-            <Check className="h-8 w-8 text-success" />
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center max-w-md w-full">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+            <Check className="h-8 w-8 text-emerald-500" />
           </div>
-          <h2 className="font-display text-xl font-semibold text-ink mb-2">Project Submitted Successfully!</h2>
-          <p className="text-gray-500 mb-6">Our team has received your request. We'll start the data review within 24 hours.</p>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Project Submitted Successfully!</h2>
+          <p className="text-sm text-slate-500 mb-6">Our team has received your request. We'll start the data review within 24 hours.</p>
           <button onClick={() => { setStep(1); setService(''); setProperty(''); setLocation(''); setCapacity(''); setFiles([]); setShowSuccess(false) }}
-            className="btn-primary">Create Another Project</button>
+            className="bg-blue-600 text-white rounded-xl px-4 py-2.5 hover:bg-blue-700 transition-all duration-200 font-medium">Create Another Project</button>
         </div>
       </div>
     )
@@ -133,50 +133,50 @@ export default function NewProjectWizard() {
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink">Start a New Project</h1>
-        <p className="text-gray-500 mt-1">Tell us about your solar site and we'll handle the rest.</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Start a New Project</h1>
+        <p className="text-sm text-slate-500 mt-1">Tell us about your solar site and we'll handle the rest.</p>
       </div>
 
       <div className="flex items-center gap-2">
         {steps.map((s, i) => (
           <div key={s.id} className="flex items-center gap-2 flex-1">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-              step > s.id ? 'bg-success text-white' :
-              step === s.id ? 'bg-brand-500 text-white' :
-              'bg-gray-100 text-gray-400'
+              step > s.id ? 'bg-blue-600 text-white' :
+              step === s.id ? 'bg-blue-600 text-white' :
+              'bg-slate-100 text-slate-400'
             }`}>
               {step > s.id ? <Check className="h-4 w-4" /> : s.id}
             </div>
-            <span className={`text-sm hidden sm:block ${step === s.id ? 'font-medium text-ink' : 'text-gray-400'}`}>{s.label}</span>
-            {i < steps.length - 1 && <div className={`flex-1 h-0.5 ${step > s.id ? 'bg-success' : 'bg-gray-100'}`} />}
+            <span className={`text-sm hidden sm:block ${step === s.id ? 'font-medium text-slate-900' : 'text-slate-400'}`}>{s.label}</span>
+            {i < steps.length - 1 && <div className={`flex-1 h-0.5 ${step > s.id ? 'bg-blue-600' : 'bg-slate-100'}`} />}
           </div>
         ))}
       </div>
 
-      <div className="card p-6 sm:p-8">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
         {/* Step 1: Service Type */}
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="font-display text-lg font-semibold text-ink">Choose your service type</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Choose your service type</h2>
             <div className="grid gap-3">
               {SERVICE_TYPES.map((s) => {
                 const Icon = serviceIcons[s.id]
                 const selected = service === s.id
                 return (
                   <button key={s.id} onClick={() => setService(s.id)}
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
-                      selected ? 'border-brand-500 bg-brand-50/50' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                      selected ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
                     }`}>
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      selected ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500'
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      selected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
                     }`}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-ink">{s.name}</p>
-                      <p className="text-sm text-gray-500">{s.desc}</p>
+                      <p className="font-medium text-slate-900">{s.name}</p>
+                      <p className="text-sm text-slate-500">{s.desc}</p>
                     </div>
-                    {selected && <Check className="h-5 w-5 text-brand-500" />}
+                    {selected && <Check className="h-5 w-5 text-blue-600" />}
                   </button>
                 )
               })}
@@ -187,37 +187,37 @@ export default function NewProjectWizard() {
         {/* Step 2: Site Details */}
         {step === 2 && (
           <div className="space-y-6">
-            <h2 className="font-display text-lg font-semibold text-ink">Tell us about your site</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Tell us about your site</h2>
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">Property Type</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Property Type</label>
               <div className="grid grid-cols-3 gap-3">
                 {propertyTypes.map((p) => {
                   const Icon = p.icon
                   const selected = property === p.id
                   return (
                     <button key={p.id} onClick={() => setProperty(p.id)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        selected ? 'border-brand-500 bg-brand-50/50' : 'border-gray-100 hover:border-gray-200'
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
+                        selected ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'
                       }`}>
-                      <Icon className={`h-6 w-6 ${selected ? 'text-brand-500' : 'text-gray-400'}`} />
-                      <span className={`text-sm ${selected ? 'font-medium text-brand-600' : 'text-gray-500'}`}>{p.label}</span>
+                      <Icon className={`h-6 w-6 ${selected ? 'text-blue-600' : 'text-slate-400'}`} />
+                      <span className={`text-sm ${selected ? 'font-medium text-blue-700' : 'text-slate-500'}`}>{p.label}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">Location</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Location</label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input type="text" value={location} onChange={e => setLocation(e.target.value)}
-                  placeholder="City, State" className="input-field pl-10" />
+                  placeholder="City, State" className="w-full rounded-xl border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 px-4 py-2.5 pl-10" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">System Capacity</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">System Capacity</label>
               <input type="text" value={capacity} onChange={e => setCapacity(e.target.value)}
-                placeholder="e.g. 10 kW, 50 kW, 200 kW" className="input-field" />
+                placeholder="e.g. 10 kW, 50 kW, 200 kW" className="w-full rounded-xl border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 px-4 py-2.5" />
             </div>
           </div>
         )}
@@ -225,7 +225,7 @@ export default function NewProjectWizard() {
         {/* Step 3: Upload Files */}
         {step === 3 && (
           <div className="space-y-6">
-            <h2 className="font-display text-lg font-semibold text-ink">Upload Site Files</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Upload Site Files</h2>
 
             {/* Hidden file input */}
             <input
@@ -242,33 +242,33 @@ export default function NewProjectWizard() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`block border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+              className={`block border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
                 dragging
-                  ? 'border-brand-500 bg-brand-50/50 scale-[1.02]'
-                  : 'border-gray-200 hover:border-brand-500/50 hover:bg-gray-50'
+                  ? 'border-blue-500 bg-blue-50/50 scale-[1.02]'
+                  : 'border-slate-200 hover:border-blue-500/50 hover:bg-slate-50'
               }`}
             >
-              <Upload className={`h-10 w-10 mx-auto mb-3 transition-colors ${dragging ? 'text-brand-500' : 'text-gray-300'}`} />
-              <p className="font-medium text-ink">
+              <Upload className={`h-10 w-10 mx-auto mb-3 transition-colors ${dragging ? 'text-blue-500' : 'text-slate-300'}`} />
+              <p className="font-medium text-slate-900">
                 {dragging ? 'Drop files here!' : 'Drop files here or click to browse'}
               </p>
-              <p className="text-sm text-gray-500 mt-1">Site photos, KML files, site plans (max 25 MB each)</p>
+              <p className="text-sm text-slate-500 mt-1">Site photos, KML files, site plans (max 25 MB each)</p>
             </div>
 
             {files.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-ink">{files.length} file(s) selected</p>
+                <p className="text-sm font-medium text-slate-900">{files.length} file(s) selected</p>
                 {files.map((f, i) => (
-                  <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2.5">
+                  <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-2.5">
                     <div className="flex items-center gap-2 min-w-0">
-                      <FileText className="h-4 w-4 text-gray-400 shrink-0" />
-                      <span className="text-sm text-ink truncate">{f.name}</span>
+                      <FileText className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span className="text-sm text-slate-900 truncate">{f.name}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-gray-400">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <span className="text-xs text-slate-400">{(f.size / 1024 / 1024).toFixed(2)} MB</span>
                       <button
                         onClick={(e) => { e.stopPropagation(); removeFile(i) }}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
+                        className="text-slate-400 hover:text-red-500 transition-colors"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -277,14 +277,14 @@ export default function NewProjectWizard() {
                 ))}
               </div>
             )}
-            <p className="text-xs text-gray-400">You can always upload more files after submission.</p>
+            <p className="text-xs text-slate-400">You can always upload more files after submission.</p>
           </div>
         )}
 
         {/* Step 4: Confirm */}
         {step === 4 && (
           <div className="space-y-6">
-            <h2 className="font-display text-lg font-semibold text-ink">Confirm Your Details</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Confirm Your Details</h2>
             <div className="space-y-3">
               {[
                 { label: 'Service', value: SERVICE_TYPES.find(s => s.id === service)?.name || service },
@@ -293,9 +293,9 @@ export default function NewProjectWizard() {
                 { label: 'Capacity', value: capacity },
                 { label: 'Files', value: `${files.length} file(s) uploaded` },
               ].map((item) => (
-                <div key={item.label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
-                  <span className="text-sm text-gray-500">{item.label}</span>
-                  <span className="text-sm font-medium text-ink">{item.value || '—'}</span>
+                <div key={item.label} className="flex justify-between py-2 border-b border-slate-100 last:border-0">
+                  <span className="text-sm text-slate-500">{item.label}</span>
+                  <span className="text-sm font-medium text-slate-900">{item.value || '—'}</span>
                 </div>
               ))}
             </div>
@@ -303,17 +303,17 @@ export default function NewProjectWizard() {
         )}
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
           <button onClick={() => setStep(s => Math.max(1, s - 1))}
             disabled={submitting}
-            className={`btn-ghost flex items-center gap-2 ${step === 1 ? 'invisible' : ''}`}>
+            className={`flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-all ${step === 1 ? 'invisible' : ''}`}>
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
           <button onClick={() => {
             if (step < 4) setStep(s => s + 1)
             else handleSubmit()
           }} disabled={!canNext() || submitting}
-            className="btn-primary flex items-center gap-2">
+            className="bg-blue-600 text-white rounded-xl px-4 py-2.5 hover:bg-blue-700 transition-all duration-200 font-medium flex items-center gap-2">
             {submitting ? 'Submitting...' : step === 4 ? 'Submit Project' : 'Continue'}
             {!submitting && <ArrowRight className="h-4 w-4" />}
           </button>

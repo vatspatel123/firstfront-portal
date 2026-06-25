@@ -4,7 +4,7 @@ import { useProjectStore, useEmployeeStore } from '../../store/useApiStores'
 
 const statusStyles: Record<string, string> = {
   completed: 'bg-green-100 text-green-700 border-green-200',
-  'on-track': 'bg-primary-50 text-primary-600 border-primary-200',
+  'on-track': 'bg-blue-50 text-blue-600 border-blue-200',
   'at-risk': 'bg-red-100 text-red-700 border-red-200',
 }
 
@@ -75,7 +75,7 @@ export default function CapacityCalendar() {
   if (projectsLoading || employeesLoading) {
     return (
       <div className="flex justify-center p-8">
-        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
       </div>
     )
   }
@@ -84,14 +84,14 @@ export default function CapacityCalendar() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Capacity & Deadlines</h1>
-          <p className="text-gray-500 mt-1">Team workload and project deadline calendar</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Capacity & Deadlines</h1>
+          <p className="text-sm text-slate-500 mt-1">Team workload and project deadline calendar</p>
         </div>
-        <div className="flex gap-1 bg-white rounded-lg border p-0.5">
+        <div className="flex gap-1 bg-white rounded-xl border border-slate-200 p-0.5">
           {(['month', 'week'] as const).map(v => (
             <button key={v} onClick={() => setView(v)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors capitalize ${
-                view === v ? 'bg-primary-600 text-white' : 'text-gray-500 hover:text-gray-700'
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
+                view === v ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-slate-700'
               }`}>
               {v}
             </button>
@@ -100,22 +100,22 @@ export default function CapacityCalendar() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border p-5 lg:col-span-2">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-primary-600" />
+            <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-blue-600" />
               {monthName}
             </h2>
             <div className="flex gap-1">
               <button onClick={() => { const d = new Date(refDate); d.setMonth(d.getMonth() - 1); setRefDate(d) }}
-                className="p-1.5 hover:bg-gray-100 rounded"><ChevronLeft className="h-4 w-4 text-gray-500" /></button>
+                className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"><ChevronLeft className="h-4 w-4 text-slate-500" /></button>
               <button onClick={() => { const d = new Date(refDate); d.setMonth(d.getMonth() + 1); setRefDate(d) }}
-                className="p-1.5 hover:bg-gray-100 rounded"><ChevronRight className="h-4 w-4 text-gray-500" /></button>
+                className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"><ChevronRight className="h-4 w-4 text-slate-500" /></button>
             </div>
           </div>
           <div className="grid grid-cols-7 gap-1 mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="text-center text-[10px] uppercase tracking-wider text-gray-400 font-medium py-1">{d}</div>
+              <div key={d} className="text-center text-[10px] uppercase tracking-wider text-slate-400 font-medium py-1">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -126,10 +126,10 @@ export default function CapacityCalendar() {
               const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear()
 
               return (
-                <div key={i} className={`aspect-square border rounded-lg p-1.5 flex flex-col ${
-                  isToday ? 'border-primary-500 bg-primary-50' : 'border-gray-100 hover:bg-gray-50'
-                }`}>
-                  <span className={`text-xs font-medium ${isToday ? 'text-primary-600' : 'text-gray-600'}`}>{day}</span>
+                <div key={i} className={`aspect-square border rounded-xl p-1.5 flex flex-col ${
+                  isToday ? 'border-blue-500 bg-blue-50' : 'border-slate-100 hover:bg-slate-50'
+                } transition-colors`}>
+                  <span className={`text-xs font-medium ${isToday ? 'text-blue-600' : 'text-slate-600'}`}>{day}</span>
                   <div className="flex-1 space-y-0.5 mt-0.5 overflow-hidden">
                     {dateDeadlines.slice(0, 2).map(d => (
                       <div key={d.id} className={`text-[9px] px-1 py-0.5 rounded border ${statusStyles[d.status]} truncate font-medium`}>
@@ -137,54 +137,54 @@ export default function CapacityCalendar() {
                       </div>
                     ))}
                     {dateDeadlines.length > 2 && (
-                      <div className="text-[9px] text-gray-400">+{dateDeadlines.length - 2}</div>
+                      <div className="text-[9px] text-slate-400">+{dateDeadlines.length - 2}</div>
                     )}
                   </div>
                 </div>
               )
             })}
           </div>
-          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-50 text-xs">
+          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-100 text-xs">
             <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-green-500" /> Completed</div>
-            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-primary-500" /> On Track</div>
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-blue-500" /> On Track</div>
             <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-red-500" /> At Risk</div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border p-5">
-          <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-1">
-            <Users className="h-4 w-4 text-primary-600" /> Designer Workload
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+          <h2 className="font-semibold text-slate-900 flex items-center gap-2 mb-1">
+            <Users className="h-4 w-4 text-blue-600" /> Designer Workload
           </h2>
-          <p className="text-xs text-gray-500 mb-4">Active deadlines per designer this month</p>
+          <p className="text-xs text-slate-500 mb-4">Active deadlines per designer this month</p>
           <div className="space-y-3">
             {designerLoad.map(d => (
               <div key={d.id}>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-7 h-7 rounded-full bg-primary-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">{d.avatar}</div>
+                  <div className="w-7 h-7 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">{d.avatar}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{d.name}</p>
+                    <p className="text-sm font-medium text-slate-900 truncate">{d.name}</p>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">{d.load}</span>
+                  <span className="text-sm font-semibold text-slate-900">{d.load}</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5 ml-9">
+                <div className="w-full bg-slate-100 rounded-full h-1.5 ml-9">
                   <div className={`h-1.5 rounded-full transition-all ${d.pct > 75 ? 'bg-red-500' : d.pct > 50 ? 'bg-amber-500' : 'bg-green-500'}`}
                     style={{ width: `${d.pct}%` }} />
                 </div>
               </div>
             ))}
             {designerLoad.length === 0 && (
-              <p className="text-gray-400 text-sm text-center py-4">No designers yet</p>
+              <p className="text-slate-400 text-sm text-center py-4">No designers yet</p>
             )}
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border">
-        <div className="px-5 py-4 border-b flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">Upcoming Deadlines</h2>
-          <span className="text-xs text-gray-400">Sorted by date</span>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="font-semibold text-slate-900">Upcoming Deadlines</h2>
+          <span className="text-xs text-slate-400">Sorted by date</span>
         </div>
-        <div className="divide-y">
+        <div className="divide-y divide-slate-100">
           {deadlines
             .filter(d => d.status !== 'completed')
             .sort((a, b) => a.date.localeCompare(b.date))
@@ -195,20 +195,20 @@ export default function CapacityCalendar() {
                 : ''
 
               return (
-                <div key={d.id} className="px-5 py-3.5 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                <div key={d.id} className="px-5 py-3.5 flex items-center gap-4 hover:bg-slate-50 transition-colors">
                   <div className="text-center shrink-0 w-12">
-                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">{new Date(d.date).toLocaleDateString('en', { month: 'short' })}</p>
-                    <p className="text-xl font-bold text-gray-900 leading-none">{new Date(d.date).getDate()}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">{new Date(d.date).toLocaleDateString('en', { month: 'short' })}</p>
+                    <p className="text-xl font-bold text-slate-900 leading-none">{new Date(d.date).getDate()}</p>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm">{d.project}</p>
-                    <p className="text-xs text-gray-400">{d.date}</p>
+                    <p className="font-medium text-slate-900 text-sm">{d.project}</p>
+                    <p className="text-xs text-slate-400">{d.date}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {d.designer !== 'Unassigned' ? (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-full bg-primary-600 text-white text-[9px] font-bold flex items-center justify-center">{initials}</div>
-                        <span className="text-xs text-gray-500 hidden sm:block">{d.designer.split(' ')[0]}</span>
+                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center">{initials}</div>
+                        <span className="text-xs text-slate-500 hidden sm:block">{d.designer.split(' ')[0]}</span>
                       </div>
                     ) : (
                       <span className="text-xs text-amber-600">Unassigned</span>
@@ -219,7 +219,7 @@ export default function CapacityCalendar() {
               )
             })}
           {deadlines.filter(d => d.status !== 'completed').length === 0 && (
-            <div className="px-5 py-8 text-center text-gray-400">No upcoming deadlines</div>
+            <div className="px-5 py-8 text-center text-slate-400">No upcoming deadlines</div>
           )}
         </div>
       </div>

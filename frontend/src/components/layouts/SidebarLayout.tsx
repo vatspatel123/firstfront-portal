@@ -30,34 +30,37 @@ export default function SidebarLayout({ navItems, roleLabel }: SidebarLayoutProp
   }
 
   const Sidebar = () => (
-    <aside className="w-64 bg-[#0f172a] text-white flex flex-col h-full">
-      <div className="p-4 flex items-center justify-between">
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-full">
+      <div className="p-4 border-b border-slate-200 flex items-center justify-between">
         <img src="/logo.svg" alt="First Front Solar Energy" className="w-full h-auto" />
-        <button onClick={() => setOpen(false)} className="lg:hidden text-white ml-2">
+        <button onClick={() => setOpen(false)} className="lg:hidden text-slate-400 hover:text-slate-600 ml-2">
           <X className="h-5 w-5" />
         </button>
       </div>
-      <p className="text-xs text-slate-400 px-5 -mt-2">{roleLabel}</p>
+      <p className="text-xs text-slate-500 px-5 mt-3">{roleLabel}</p>
       <nav className="flex-1 px-4 space-y-1 overflow-y-auto mt-4">
         {navItems.map(item => (
           <Link
             key={item.path}
             to={item.path}
             className={clsx(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors',
               location.pathname === item.path
-                ? 'bg-white/10 text-white'
-                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                ? 'bg-blue-50 text-blue-700 font-medium'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             )}
           >
-            <item.icon className="h-5 w-5" />
+            <item.icon className={clsx(
+              'h-5 w-5',
+              location.pathname === item.path ? 'text-blue-600' : 'text-slate-400'
+            )} />
             {item.label}
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t border-white/10">
-        <div className="text-sm text-slate-400 mb-2">{user?.name || user?.email || roleLabel}</div>
-        <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-slate-400 hover:text-white">
+      <div className="p-4 border-t border-slate-200">
+        <div className="text-sm text-slate-600 mb-2">{user?.name || user?.email || roleLabel}</div>
+        <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900">
           <LogOut className="h-4 w-4" />
           Logout
         </button>
@@ -85,8 +88,8 @@ export default function SidebarLayout({ navItems, roleLabel }: SidebarLayoutProp
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Mobile header */}
-        <div className="lg:hidden sticky top-0 z-30 bg-white border-b px-4 py-3 flex items-center gap-3">
-          <button onClick={() => setOpen(true)} className="p-1 text-gray-600 hover:text-gray-900">
+        <div className="lg:hidden sticky top-0 z-30 bg-white shadow-sm px-4 py-3 flex items-center gap-3">
+          <button onClick={() => setOpen(true)} className="p-1 text-slate-600 hover:text-slate-900">
             <Menu className="h-6 w-6" />
           </button>
           <img src="/logo.svg" alt="First Front" className="h-8" />
