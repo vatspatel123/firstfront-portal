@@ -11,10 +11,21 @@ export default function ProjectAssignment() {
   const [scopeNotes, setScopeNotes] = useState<Record<string, string>>({})
   const [deadlines, setDeadlines] = useState<Record<string, string>>({})
   const [assigning, setAssigning] = useState<string | null>(null)
+  const [workload, setWorkload] = useState<Record<string, number>>({})
 
   useEffect(() => {
     fetchProjects()
     fetchEmployees()
+    const fetchWorkload = async () => {
+      try {
+        const res = await API.get('/api/projects/designer-workload')
+        const data = Array.isArray(res.data) ? res.data : []
+        const map: Record<string, number> = {}
+        data.forEach((d: any) => { map[d.user_id] = d.active_projects })
+        setWorkload(map)
+      } catch {}
+    }
+    fetchWorkload()
   }, [])
 
   const filtered = projects.filter(p =>
@@ -76,9 +87,12 @@ export default function ProjectAssignment() {
         className="appearance-none w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-8 cursor-pointer disabled:opacity-50"
       >
         <option value="">— Unassigned —</option>
-        {employees.filter(e => e.department.toLowerCase() === 'design').map(e => (
-          <option key={e.id} value={e.user_id}>{e.name}</option>
-        ))}
+        {employees.filter(e => e.department.toLowerCase() === 'design').map(e => {
+          const count = workload[e.user_id] || 0
+          return (
+            <option key={e.id} value={e.user_id}>{e.name} ({count} active)</option>
+          )
+        })}
       </select>
       <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
     </div>

@@ -95,7 +95,7 @@ export default function DesignerDayView() {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate('/designer/workspace')}
+                  onClick={() => navigate(`/designer/workspace?project=${t.id}`)}
                   className="bg-blue-600 text-white text-sm py-2.5 px-5 rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium shrink-0 flex items-center gap-1"
                 >
                   <Play className="h-4 w-4" />

@@ -1,26 +1,33 @@
 import { useState, useEffect } from 'react'
-import { CheckSquare, Square, Upload, FileText, Download, FolderOpen, Calendar, Clock } from 'lucide-react'
+import { CheckSquare, Square, Upload, FileText, Download, FolderOpen, Calendar, Clock, ArrowRight } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import API from '../../utils/api'
 import toast from 'react-hot-toast'
 
-const DEFAULT_CHECKLIST = [
-  { id: 1, label: 'Review uploaded site photos', done: false },
-  { id: 2, label: 'Verify site address and KML', done: false },
-  { id: 3, label: 'Run shadow analysis', done: false },
-  { id: 4, label: 'Generate 3D layout', done: false },
-  { id: 5, label: 'Prepare report PDF', done: false },
-]
+interface ChecklistItem {
+  id: string
+  label: string
+  done: boolean
+}
+
+const STATUS_ADVANCE: Record<string, { next: string; label: string }> = {
+  assigned: { next: 'design_in_progress', label: 'Start Design' },
+  design_in_progress: { next: 'qa_review', label: 'Submit for Review' },
+}
 
 export default function ProjectWorkspace() {
+  const [searchParams] = useSearchParams()
   const [projects, setProjects] = useState<any[]>([])
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [items, setItems] = useState(DEFAULT_CHECKLIST)
+  const [selectedId, setSelectedId] = useState<string | null>(searchParams.get('project'))
+  const [items, setItems] = useState<ChecklistItem[]>([])
   const [outputs, setOutputs] = useState<any[]>([])
   const [inputs, setInputs] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [advancing, setAdvancing] = useState(false)
 
-  const activeProject = projects.find(p => p.id === selectedId) || projects.find(p => ['assigned', 'design_in_progress'].includes(p.status))
+  const activeProject = projects.find(p => p.id === selectedId) ||
+    projects.find(p => ['assigned', 'design_in_progress'].includes(p.status))
 
   useEffect(() => {
     const load = async () => {
@@ -28,6 +35,10 @@ export default function ProjectWorkspace() {
         const res = await API.get('/api/projects/', { params: { assigned_to_me: true } })
         const data = Array.isArray(res.data) ? res.data : []
         setProjects(data)
+        if (!selectedId && data.length > 0) {
+          const active = data.find((p: any) => ['assigned', 'design_in_progress'].includes(p.status))
+          if (active) setSelectedId(active.id)
+        }
       } catch (err) {
         console.error('Failed to load projects', err)
       } finally {
@@ -40,9 +51,20 @@ export default function ProjectWorkspace() {
   useEffect(() => {
     if (activeProject) {
       fetchFiles()
+      fetchChecklist()
       setSelectedId(activeProject.id)
     }
   }, [activeProject?.id])
+
+  const fetchChecklist = async () => {
+    if (!activeProject) return
+    try {
+      const res = await API.get(`/api/projects/${activeProject.id}/checklist`)
+      setItems(Array.isArray(res.data) ? res.data : [])
+    } catch {
+      setItems([])
+    }
+  }
 
   const fetchFiles = async () => {
     if (!activeProject) return
@@ -70,7 +92,7 @@ export default function ProjectWorkspace() {
       })
       toast.success('File uploaded successfully')
       fetchFiles()
-    } catch (err) {
+    } catch {
       toast.error('Failed to upload file')
     } finally {
       setUploading(false)
@@ -90,7 +112,7 @@ export default function ProjectWorkspace() {
       })
       toast.success('File uploaded successfully')
       fetchFiles()
-    } catch (err) {
+    } catch {
       toast.error('Failed to upload file')
     } finally {
       setUploading(false)
@@ -109,14 +131,46 @@ export default function ProjectWorkspace() {
       document.body.appendChild(link)
       link.click()
       link.remove()
-    } catch (err) {
+    } catch {
       toast.error('Failed to download file')
     }
   }
 
-  const toggleItem = (id: number) => setItems(items.map(i => i.id === id ? { ...i, done: !i.done } : i))
+  const toggleItem = async (id: string) => {
+    const updated = items.map(i => i.id === id ? { ...i, done: !i.done } : i)
+    setItems(updated)
+    try {
+      await API.put(`/api/projects/${activeProject.id}/checklist`, {
+        items: updated.map(i => ({ id: i.id, label: i.label, done: i.done }))
+      })
+    } catch {
+      toast.error('Failed to save checklist')
+    }
+  }
+
+  const handleAdvanceStatus = async () => {
+    if (!activeProject) return
+    const advance = STATUS_ADVANCE[activeProject.status]
+    if (!advance) return
+
+    setAdvancing(true)
+    try {
+      await API.patch(`/api/projects/${activeProject.id}/status`, {
+        status: advance.next,
+        note: `Status advanced by designer`
+      })
+      toast.success(`Project moved to ${advance.next.replace(/_/g, ' ')}`)
+      const res = await API.get('/api/projects/', { params: { assigned_to_me: true } })
+      setProjects(Array.isArray(res.data) ? res.data : [])
+    } catch {
+      toast.error('Failed to update status')
+    } finally {
+      setAdvancing(false)
+    }
+  }
 
   const progress = items.length > 0 ? (items.filter(i => i.done).length / items.length) * 100 : 0
+  const advanceInfo = activeProject ? STATUS_ADVANCE[activeProject.status] : null
 
   if (loading) {
     return (
@@ -147,21 +201,30 @@ export default function ProjectWorkspace() {
           <h1 className="text-2xl font-semibold text-slate-900">Project Workspace</h1>
           <p className="text-sm text-slate-500 mt-1">{activeProject.name} · {activeProject.location}</p>
         </div>
-        <div className="flex items-center gap-3 text-sm text-slate-500">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <Clock className="h-4 w-4" />
             <span>{activeProject.client_name || 'Client'}</span>
           </div>
           {activeProject.deadline && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 text-sm text-slate-500">
               <Calendar className="h-4 w-4" />
               <span>Due {new Date(activeProject.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
             </div>
           )}
+          {advanceInfo && (
+            <button
+              onClick={handleAdvanceStatus}
+              disabled={advancing}
+              className="bg-green-600 text-white text-sm py-2 px-4 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium flex items-center gap-1.5 disabled:opacity-50"
+            >
+              {advancing ? 'Updating...' : advanceInfo.label}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Project Selector */}
       {projects.length > 1 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
           <p className="text-sm font-medium text-slate-900 mb-2">Switch Project</p>
@@ -184,7 +247,6 @@ export default function ProjectWorkspace() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Checklist */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
           <h2 className="font-semibold text-slate-900 mb-4">Design Checklist</h2>
           <div className="space-y-2">
@@ -208,9 +270,7 @@ export default function ProjectWorkspace() {
           </div>
         </div>
 
-        {/* Files */}
         <div className="space-y-4">
-          {/* Output Files */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
             <h2 className="font-semibold text-slate-900 mb-4">Design Outputs</h2>
             <label className="block border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:border-blue-400/50 transition-all duration-200 cursor-pointer">
@@ -232,7 +292,6 @@ export default function ProjectWorkspace() {
             </div>
           </div>
 
-          {/* Input Files */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900">Site Data</h2>

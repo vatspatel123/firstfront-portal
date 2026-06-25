@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from uuid import UUID
 from typing import List, Optional
+from pydantic import BaseModel
 from app.database import get_db
-from app.models.project import Project, ProjectStatus, ProjectFile, ProjectOutput, ProjectStatusLog
+from app.models.project import Project, ProjectStatus, ProjectFile, ProjectOutput, ProjectStatusLog, DesignerChecklistItem
 from app.models.client import Client
 from app.models.user import User
 from app.schemas.project import (ProjectCreate, ProjectResponse, ProjectStatusUpdate,
@@ -261,3 +262,121 @@ async def download_output(output_id: UUID, db: AsyncSession = Depends(get_db), u
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found on disk")
     return FileResponse(path=str(file_path), filename=output.original_name, media_type="application/octet-stream")
+
+
+# ── Designer Checklist ──
+
+DEFAULT_CHECKLIST = [
+    "Review uploaded site photos",
+    "Verify site address and KML",
+    "Run shadow analysis",
+    "Generate 3D layout",
+    "Prepare report PDF",
+]
+
+class ChecklistItemUpdate(BaseModel):
+    id: Optional[str] = None
+    label: str
+    done: bool
+
+class ChecklistBulkUpdate(BaseModel):
+    items: List[ChecklistItemUpdate]
+
+
+@router.get("/{project_id}/checklist")
+async def get_checklist(
+    project_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    result = await db.execute(
+        select(DesignerChecklistItem)
+        .where(DesignerChecklistItem.project_id == project_id)
+        .order_by(DesignerChecklistItem.order)
+    )
+    items = result.scalars().all()
+
+    if not items:
+        for i, label in enumerate(DEFAULT_CHECKLIST):
+            item = DesignerChecklistItem(project_id=project_id, label=label, done=False, order=i)
+            db.add(item)
+        await db.commit()
+        result = await db.execute(
+            select(DesignerChecklistItem)
+            .where(DesignerChecklistItem.project_id == project_id)
+            .order_by(DesignerChecklistItem.order)
+        )
+        items = result.scalars().all()
+
+    return [
+        {"id": str(item.id), "label": item.label, "done": item.done, "order": item.order}
+        for item in items
+    ]
+
+
+@router.put("/{project_id}/checklist")
+async def update_checklist(
+    project_id: UUID,
+    req: ChecklistBulkUpdate,
+    db: AsyncSession = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    for item_data in req.items:
+        if item_data.id:
+            item_result = await db.execute(
+                select(DesignerChecklistItem).where(
+                    DesignerChecklistItem.id == UUID(item_data.id),
+                    DesignerChecklistItem.project_id == project_id
+                )
+            )
+            item = item_result.scalar_one_or_none()
+            if item:
+                item.done = item_data.done
+                item.label = item_data.label
+        else:
+            max_order_result = await db.execute(
+                select(func.max(DesignerChecklistItem.order))
+                .where(DesignerChecklistItem.project_id == project_id)
+            )
+            max_order = max_order_result.scalar() or 0
+            new_item = DesignerChecklistItem(
+                project_id=project_id,
+                label=item_data.label,
+                done=item_data.done,
+                order=max_order + 1
+            )
+            db.add(new_item)
+
+    await db.commit()
+    return {"message": "Checklist updated"}
+
+
+# ── Designer Workload ──
+
+@router.get("/designer-workload")
+async def designer_workload(
+    db: AsyncSession = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    from app.models.employee import Employee
+    designers = await db.execute(
+        select(Employee).where(Employee.department.ilike('design'))
+    )
+    designers = designers.scalars().all()
+
+    result = []
+    for d in designers:
+        active_count = await db.execute(
+            select(func.count(Project.id)).where(
+                Project.assigned_to == d.user_id,
+                Project.status.in_([ProjectStatus.ASSIGNED, ProjectStatus.DESIGN_IN_PROGRESS])
+            )
+        )
+        count = active_count.scalar() or 0
+        result.append({
+            "user_id": str(d.user_id),
+            "name": d.name,
+            "active_projects": count,
+        })
+
+    return result

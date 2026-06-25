@@ -133,8 +133,6 @@ export default function ProjectBoard() {
                   const initials = hasDesigner
                     ? p.designer_name!.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
                     : ''
-                  const prioNum = parseInt(p.id.replace(/-/g, '').slice(0, 2), 16) % 3
-                  const priority = prioNum === 0 ? 'high' : prioNum === 1 ? 'medium' : 'low'
 
                   return (
                     <div
@@ -169,7 +167,7 @@ export default function ProjectBoard() {
                             <span className="text-[11px] text-amber-600 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Unassigned</span>
                           )}
                         </div>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${priorityStyles[priority]}`}>{priority}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${priorityStyles[p.priority || 'medium']}`}>{p.priority || 'medium'}</span>
                       </div>
                     </div>
                   )

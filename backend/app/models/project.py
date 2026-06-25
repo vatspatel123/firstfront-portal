@@ -82,3 +82,14 @@ class ProjectStatusLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     project = relationship("Project", back_populates="status_logs")
+
+
+class DesignerChecklistItem(Base):
+    __tablename__ = "designer_checklist_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("projects.id"))
+    label: Mapped[str] = mapped_column(String(500))
+    done: Mapped[bool] = mapped_column(default=False)
+    order: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
